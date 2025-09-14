@@ -16,5 +16,5 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
-  base: '/SCHEDULE-IMPORT/', // GitHub Pages的仓库名称
+  base: './', // 使用相对路径，适用于各种部署环境
 }); 

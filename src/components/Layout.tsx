@@ -47,14 +47,32 @@ const Layout: React.FC = () => {
   // 获取正确的资源路径
   const getBasePath = (): string => {
     if (typeof window !== 'undefined') {
-      const baseUrl = window.location.pathname.includes('SCHEDULE-IMPORT') ? '/SCHEDULE-IMPORT/' : '/';
-      return baseUrl;
+      // 检测部署环境
+      if (window.location.hostname.includes('github.io') && window.location.pathname.includes('SCHEDULE-IMPORT')) {
+        // GitHub Pages环境
+        return '/SCHEDULE-IMPORT/';
+      } else if (window.location.hostname.includes('vercel.app')) {
+        // Vercel环境
+        return '/';
+      }
     }
-    return '/';
+    // 默认使用相对路径
+    return './';
+  };
+  
+  // 确保背景图片路径正确
+  const getBackgroundPath = (): string => {
+    const base = getBasePath();
+    // 如果是相对路径（./)，则不需要前导斜杠
+    if (base === './') {
+      return 'backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
+    }
+    // 否则加上基础路径
+    return `${base}backImg/f028b1e9685c586324a8f2a6626e3695.jpeg`;
   };
   
   // 默认背景图片
-  const defaultBgImage = `${getBasePath()}backImg/f028b1e9685c586324a8f2a6626e3695.jpeg`;
+  const defaultBgImage = getBackgroundPath();
   
   // 获取背景图片 - 现在直接使用设置中的背景图片值
   const backgroundImage = settings?.backgroundImage || defaultBgImage;
