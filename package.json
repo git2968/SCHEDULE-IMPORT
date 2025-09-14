@@ -20,12 +20,14 @@
     "@types/react-dom": "^18.2.0",
     "@types/uuid": "^9.0.7",
     "@vitejs/plugin-react": "^4.2.1",
+    "cross-env": "^7.0.3",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:github": "cross-env GITHUB_PAGES=true vite build",
     "preview": "vite preview"
   }
 }

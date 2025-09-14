@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 // https://vitejs.dev/config/
+// 确定部署环境，根据环境变量或命令行参数
+const isGithubPages = process.env.GITHUB_PAGES === 'true';
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -16,5 +19,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
-  base: './', // 使用相对路径，适用于各种部署环境
+  // 根据不同部署环境使用不同基础路径
+  base: isGithubPages ? '/SCHEDULE-IMPORT/' : '/',
 }); 
