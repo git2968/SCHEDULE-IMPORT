@@ -84,12 +84,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // 登出功能
-  const logout = async () => {
-    setCurrentUser(null);
-    localStorage.removeItem('currentUser');
-    
-    // 简单刷新页面以切换到默认背景
-    window.location.reload();
+  const logout = async (onBeforeLogout?: () => Promise<void>) => {
+    try {
+      // 如果提供了登出前回调，先执行回调（例如过渡动画）
+      if (onBeforeLogout) {
+        await onBeforeLogout();
+      }
+      
+      setCurrentUser(null);
+      localStorage.removeItem('currentUser');
+      
+      // 简单刷新页面以切换到默认背景
+      window.location.reload();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error;
+    }
   };
 
   const value = {

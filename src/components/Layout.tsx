@@ -13,8 +13,18 @@ const LayoutContainer = styled.div`
   overflow: hidden;
 `;
 
-const BackgroundImage = styled.div<{ bgImage: string }>`
+// 使用两个背景层实现平滑过渡
+const BackgroundWrapper = styled.div`
   position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+`;
+
+const BackgroundImage = styled.div<{ bgImage: string; isActive: boolean }>`
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -23,8 +33,8 @@ const BackgroundImage = styled.div<{ bgImage: string }>`
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  z-index: -1;
-  transition: background-image 0.5s ease;
+  transition: opacity 1.2s ease;
+  opacity: ${props => props.isActive ? 1 : 0};
 `;
 
 const Main = styled.main`
@@ -43,6 +53,9 @@ const Main = styled.main`
 
 const Layout: React.FC = () => {
   const { settings } = useSettings();
+  const [currentBg, setCurrentBg] = React.useState<string>('');
+  const [prevBg, setPrevBg] = React.useState<string>('');
+  const [isTransitioning, setIsTransitioning] = React.useState<boolean>(false);
   
   // 获取正确的资源路径
   const getBasePath = (): string => {
@@ -77,15 +90,54 @@ const Layout: React.FC = () => {
   // 默认背景图片
   const defaultBgImage = getBackgroundPath();
   
-  // 获取背景图片 - 现在直接使用设置中的背景图片值
-  const backgroundImage = settings?.backgroundImage || defaultBgImage;
+  // 当设置中的背景图片变化时，触发平滑过渡
+  React.useEffect(() => {
+    const newBg = settings?.backgroundImage || defaultBgImage;
+    
+    if (newBg !== currentBg && currentBg) {
+      // 存储当前背景作为前一个背景
+      setPrevBg(currentBg);
+      // 设置新的背景
+      setCurrentBg(newBg);
+      // 开始过渡
+      setIsTransitioning(true);
+      
+      // 过渡结束后重置状态
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 1200); // 与CSS过渡时间匹配
+      
+      return () => clearTimeout(timer);
+    } else {
+      // 初始加载时直接设置背景
+      setCurrentBg(newBg);
+    }
+  }, [settings?.backgroundImage, defaultBgImage]);
   
-  // 为了调试目的，打印背景图片信息
-  console.log('Background image:', backgroundImage);
+  // 用于调试
+  React.useEffect(() => {
+    console.log('Background image:', currentBg);
+    console.log('Previous background:', prevBg);
+    console.log('Is transitioning:', isTransitioning);
+  }, [currentBg, prevBg, isTransitioning]);
 
   return (
     <LayoutContainer>
-      <BackgroundImage bgImage={backgroundImage} />
+      <BackgroundWrapper>
+        {/* 显示前一个背景（淡出） */}
+        {isTransitioning && prevBg && (
+          <BackgroundImage 
+            bgImage={prevBg} 
+            isActive={false} 
+          />
+        )}
+        
+        {/* 显示当前背景（淡入） */}
+        <BackgroundImage 
+          bgImage={currentBg} 
+          isActive={true} 
+        />
+      </BackgroundWrapper>
       <Header />
       <Main>
         <Outlet />

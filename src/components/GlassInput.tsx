@@ -24,15 +24,16 @@ const StyledInputContainer = styled.div<{ fullWidth?: boolean }>`
 const StyledInput = styled.input<{ disabled?: boolean }>`
   width: 100%;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.1);
+  background: ${props => props.disabled ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)'};
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid ${props => props.disabled ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)'};
   border-radius: 8px;
-  color: inherit;
+  color: ${props => props.disabled ? 'rgba(255, 255, 255, 0.5)' : 'inherit'};
   font-size: 1rem;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   outline: none;
   opacity: ${props => (props.disabled ? '0.7' : '1')};
+  cursor: ${props => props.disabled ? 'not-allowed' : 'text'};
   
   &:focus {
     border-color: rgba(255, 255, 255, 0.5);
@@ -40,7 +41,7 @@ const StyledInput = styled.input<{ disabled?: boolean }>`
   }
   
   &::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: ${props => props.disabled ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.5)'};
   }
 `;
 
