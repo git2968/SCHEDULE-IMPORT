@@ -44,8 +44,17 @@ const Main = styled.main`
 const Layout: React.FC = () => {
   const { settings } = useSettings();
   
+  // 获取正确的资源路径
+  const getBasePath = (): string => {
+    if (typeof window !== 'undefined') {
+      const baseUrl = window.location.pathname.includes('SCHEDULE-IMPORT') ? '/SCHEDULE-IMPORT/' : '/';
+      return baseUrl;
+    }
+    return '/';
+  };
+  
   // 默认背景图片
-  const defaultBgImage = '/backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
+  const defaultBgImage = `${getBasePath()}backImg/f028b1e9685c586324a8f2a6626e3695.jpeg`;
   
   // 获取背景图片 - 现在直接使用设置中的背景图片值
   const backgroundImage = settings?.backgroundImage || defaultBgImage;
