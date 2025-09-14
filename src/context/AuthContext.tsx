@@ -83,18 +83,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // 登出功能
-  const logout = async (onBeforeLogout?: () => Promise<void>) => {
+  // 登出功能 - 简化版本
+  const logout = async () => {
     try {
-      // 如果提供了登出前回调，先执行回调（例如过渡动画）
-      if (onBeforeLogout) {
-        await onBeforeLogout();
-      }
-      
+      // 直接清除用户信息
       setCurrentUser(null);
       localStorage.removeItem('currentUser');
       
-      // 简单刷新页面以切换到默认背景
+      // 刷新页面以应用默认设置
       window.location.reload();
     } catch (error) {
       console.error('Logout failed:', error);

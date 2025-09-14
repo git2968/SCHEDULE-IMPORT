@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
@@ -13,8 +13,8 @@ const LayoutContainer = styled.div`
   overflow: hidden;
 `;
 
-// 使用两个背景层实现平滑过渡
-const BackgroundWrapper = styled.div`
+// 简洁的背景容器
+const BackgroundContainer = styled.div`
   position: fixed;
   top: 0;
   left: 0;
@@ -23,18 +23,19 @@ const BackgroundWrapper = styled.div`
   z-index: -1;
 `;
 
-const BackgroundImage = styled.div<{ bgImage: string; isActive: boolean }>`
+// 背景图片 - 使用简单的交叉淡入淡出效果
+const BackgroundImage = styled.div<{ $url: string }>`
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url(${props => props.bgImage});
-  background-size: cover;
+  background-image: url(${props => props.$url});
   background-position: center;
+  background-size: cover;
   background-repeat: no-repeat;
-  transition: opacity 1.2s ease;
-  opacity: ${props => props.isActive ? 1 : 0};
+  transition: opacity 1s ease;
+  opacity: 1;
 `;
 
 const Main = styled.main`
@@ -53,91 +54,56 @@ const Main = styled.main`
 
 const Layout: React.FC = () => {
   const { settings } = useSettings();
-  const [currentBg, setCurrentBg] = React.useState<string>('');
-  const [prevBg, setPrevBg] = React.useState<string>('');
-  const [isTransitioning, setIsTransitioning] = React.useState<boolean>(false);
+  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
   
-  // 获取正确的资源路径
-  const getBasePath = (): string => {
+  // 获取默认背景图片路径
+  const getDefaultBackgroundPath = (): string => {
     if (typeof window !== 'undefined') {
-      // 检测部署环境
-      if (window.location.hostname.includes('github.io') && window.location.pathname.includes('SCHEDULE-IMPORT')) {
-        // GitHub Pages环境
-        return '/SCHEDULE-IMPORT/';
+      if (window.location.hostname.includes('github.io') && 
+          window.location.pathname.includes('SCHEDULE-IMPORT')) {
+        return '/SCHEDULE-IMPORT/backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
       } else if (window.location.hostname.includes('vercel.app')) {
-        // Vercel环境
-        return '/';
+        return '/backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
       }
     }
-    // 默认使用相对路径
-    return './';
-  };
-  
-  // 确保背景图片路径正确
-  const getBackgroundPath = (): string => {
-    // 检查是否在 Vercel 环境
-    if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-      // Vercel环境，使用绝对路径
-      return '/backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
-    } else if (typeof window !== 'undefined' && window.location.hostname.includes('github.io')) {
-      // GitHub Pages环境
-      return '/SCHEDULE-IMPORT/backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
-    }
-    // 开发环境，使用相对路径
     return './backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
   };
-  
-  // 默认背景图片
-  const defaultBgImage = getBackgroundPath();
-  
-  // 当设置中的背景图片变化时，触发平滑过渡
-  React.useEffect(() => {
-    const newBg = settings?.backgroundImage || defaultBgImage;
+
+  // 当背景图片改变时更新
+  useEffect(() => {
+    const currentBg = settings?.backgroundImage || getDefaultBackgroundPath();
     
-    if (newBg !== currentBg && currentBg) {
-      // 存储当前背景作为前一个背景
-      setPrevBg(currentBg);
-      // 设置新的背景
-      setCurrentBg(newBg);
-      // 开始过渡
-      setIsTransitioning(true);
-      
-      // 过渡结束后重置状态
-      const timer = setTimeout(() => {
-        setIsTransitioning(false);
-      }, 1200); // 与CSS过渡时间匹配
-      
-      return () => clearTimeout(timer);
-    } else {
-      // 初始加载时直接设置背景
-      setCurrentBg(newBg);
+    // 如果是第一次加载或背景图片相同，直接设置
+    if (backgroundImages.length === 0 || backgroundImages[0] === currentBg) {
+      setBackgroundImages([currentBg]);
+      return;
     }
-  }, [settings?.backgroundImage, defaultBgImage]);
-  
-  // 用于调试
-  React.useEffect(() => {
-    console.log('Background image:', currentBg);
-    console.log('Previous background:', prevBg);
-    console.log('Is transitioning:', isTransitioning);
-  }, [currentBg, prevBg, isTransitioning]);
+    
+    // 添加新背景，保持旧背景在下方
+    setBackgroundImages(prev => [currentBg, ...prev]);
+    
+    // 一段时间后移除旧背景
+    const timer = setTimeout(() => {
+      setBackgroundImages(prev => [prev[0]]);
+    }, 1000); // 等待过渡完成
+    
+    return () => clearTimeout(timer);
+  }, [settings?.backgroundImage]);
 
   return (
     <LayoutContainer>
-      <BackgroundWrapper>
-        {/* 显示前一个背景（淡出） */}
-        {isTransitioning && prevBg && (
-          <BackgroundImage 
-            bgImage={prevBg} 
-            isActive={false} 
+      <BackgroundContainer>
+        {backgroundImages.map((url, index) => (
+          <BackgroundImage
+            key={`${url}-${index}`}
+            $url={url}
+            style={{
+              opacity: index === 0 ? 1 : 0, // 只显示最顶层背景
+              zIndex: backgroundImages.length - index // 确保层叠顺序正确
+            }}
           />
-        )}
-        
-        {/* 显示当前背景（淡入） */}
-        <BackgroundImage 
-          bgImage={currentBg} 
-          isActive={true} 
-        />
-      </BackgroundWrapper>
+        ))}
+      </BackgroundContainer>
       <Header />
       <Main>
         <Outlet />
