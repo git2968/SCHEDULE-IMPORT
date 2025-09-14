@@ -1,0 +1,163 @@
+:root {
+  /* 主题颜色 - 更亮更鲜艳的色调 */
+  --primary-color: #0A84FF;
+  --secondary-color: #64D2FF;
+  --accent-color: #FF375F;
+  --success-color: #30D158;
+  --warning-color: #FFD60A;
+  --error-color: #FF453A;
+  
+  /* 文本颜色 */
+  --text-color: rgba(0, 0, 0, 0.85);
+  --light-text: rgba(0, 0, 0, 0.6);
+  --dark-text: #000000;
+  --white-text: rgba(255, 255, 255, 0.9);
+  
+  /* 边框和背景 */
+  --border-color: rgba(255, 255, 255, 0.4);
+  --background-color: #F2F2F7;
+  --card-background: rgba(255, 255, 255, 0.5);
+  
+  /* 阴影 */
+  --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  
+  /* 过渡效果 */
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  /* 毛玻璃效果 */
+  --glass-background: rgba(255, 255, 255, 0.6);
+  --glass-blur: 25px;
+  --glass-saturation: 180%;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: 'SF Pro Display', 'SF Pro Text', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.5;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--secondary-color);
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* 毛玻璃组件通用样式 */
+.glass {
+  background: var(--glass-background);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  border: var(--glass-border);
+  border-radius: 16px;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 12px;
+  }
+} 
