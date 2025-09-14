@@ -19,13 +19,16 @@ const getBasePath = (): string => {
 
 // 确保背景图片路径正确
 const getBackgroundPath = (): string => {
-  const base = getBasePath();
-  // 如果是相对路径（./)，则不需要前导斜杠
-  if (base === './') {
-    return 'backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
+  // 检查是否在 Vercel 环境
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    // Vercel环境，使用绝对路径
+    return '/backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
+  } else if (typeof window !== 'undefined' && window.location.hostname.includes('github.io')) {
+    // GitHub Pages环境
+    return '/SCHEDULE-IMPORT/backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
   }
-  // 否则加上基础路径
-  return `${base}backImg/f028b1e9685c586324a8f2a6626e3695.jpeg`;
+  // 开发环境，使用相对路径
+  return './backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
 };
 
 // 默认设置

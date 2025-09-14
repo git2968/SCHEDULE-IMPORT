@@ -79,7 +79,19 @@ const Login: React.FC = () => {
       setLoading(true);
       await login(email, password);
       toast.success('登录成功');
-      navigate(from);
+      
+      // 登录成功后，先刷新页面再跳转
+      // 这样可以确保加载用户自定义的背景图片和其他设置
+      if (from === '/') {
+        // 如果要回到首页，直接刷新页面
+        window.location.href = '/';
+      } else {
+        // 如果要跳转到其他页面，先刷新页面然后再导航
+        window.location.reload();
+        // 等页面刷新后，浏览器会重新加载，下面的代码不会执行
+        // 但为了安全起见，还是保留此行代码
+        navigate(from);
+      }
     } catch (error) {
       setError('登录失败，请检查邮箱和密码');
       toast.error('登录失败');

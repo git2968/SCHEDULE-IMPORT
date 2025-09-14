@@ -9,14 +9,17 @@ interface GlassButtonProps {
   size?: 'small' | 'medium' | 'large';
   className?: string;
   type?: 'button' | 'submit' | 'reset';
+  fullWidth?: boolean;
 }
 
 const StyledButton = styled.button<{
   variant: string;
   size: string;
   disabled?: boolean;
+  fullWidth?: boolean;
 }>`
-  display: inline-flex;
+  display: ${props => props.fullWidth ? 'flex' : 'inline-flex'};
+  width: ${props => props.fullWidth ? '100%' : 'auto'};
   align-items: center;
   justify-content: center;
   background: ${props => {
@@ -111,6 +114,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
   size = 'medium',
   className,
   type = 'button',
+  fullWidth = false,
 }) => {
   return (
     <StyledButton
@@ -120,6 +124,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
       size={size}
       className={className}
       type={type}
+      fullWidth={fullWidth}
     >
       {children}
     </StyledButton>
