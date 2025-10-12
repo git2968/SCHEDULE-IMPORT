@@ -8,12 +8,15 @@ export interface Course {
   id: string;
   name: string;
   code: string;
+  courseId: string; // 课程编号
   teacher?: string;
   startWeek: number;
   endWeek: number;
   day: number;
   startTime: number;
   endTime: number;
+  startSession: number; // 开始节次
+  endSession: number; // 结束节次
   location: string;
   weeks: number[]; // 存储课程所在的周数，如 [1, 2, 3, 5, 7, 9]
   scheduleId?: string; // 关联的课表ID
@@ -24,11 +27,22 @@ export interface Schedule {
   name: string;
   createdAt: number;
   userId: string;
+  totalWeeks?: number; // 总周数
+  courses?: Course[]; // 课程列表
 }
 
 export interface Settings {
   backgroundImage?: string;
   theme?: string;
+}
+
+export interface AppSettings {
+  backgroundImage?: string;
+  theme?: string;
+  language?: string;
+  currentWeek?: number; // 当前周数
+  semesterStartDate?: string; // 学期开始日期 (YYYY-MM-DD格式)
+  autoUpdateWeek?: boolean; // 是否自动更新当前周数
 }
 
 export interface AuthContextType {
@@ -56,8 +70,10 @@ export interface ScheduleContextType {
 }
 
 export interface SettingsContextType {
-  settings: Settings | null;
-  updateSettings: (newSettings: Partial<Settings>) => Promise<void>;
+  settings: AppSettings | null;
+  updateSettings: (newSettings: Partial<AppSettings>) => Promise<void>;
   uploadBackgroundImage: (file: File) => Promise<void>;
   resetSettings: () => Promise<void>;
+  getCurrentWeek: () => number;
+  updateCurrentWeek: () => void;
 } 

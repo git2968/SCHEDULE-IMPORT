@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { AppSettings, SettingsContextType } from '../types';
+import { calculateCurrentWeek, getTodayString } from '../utils/dateUtils';
 
 // 获取正确的资源基础路径
 const getBasePath = (): string => {
@@ -35,7 +36,10 @@ const getBackgroundPath = (): string => {
 const defaultSettings: AppSettings = {
   backgroundImage: getBackgroundPath(), // 默认背景图片路径
   theme: 'light',
-  language: 'zh'
+  language: 'zh',
+  currentWeek: 1,
+  semesterStartDate: getTodayString(), // 默认为今天
+  autoUpdateWeek: true
 };
 
 // 创建设置上下文
@@ -144,10 +148,48 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     });
   };
 
+  // 获取当前周数
+  const getCurrentWeek = (): number => {
+    if (!settings) return 1;
+    
+    if (settings.autoUpdateWeek && settings.semesterStartDate) {
+      return calculateCurrentWeek(settings.semesterStartDate);
+    }
+    
+    return settings.currentWeek || 1;
+  };
+
+  // 更新当前周数（根据当前日期和学期开始日期自动计算）
+  const updateCurrentWeek = () => {
+    if (!settings || !settings.autoUpdateWeek || !settings.semesterStartDate) {
+      return;
+    }
+    
+    const calculatedWeek = calculateCurrentWeek(settings.semesterStartDate);
+    if (calculatedWeek !== settings.currentWeek) {
+      updateSettings({ currentWeek: calculatedWeek });
+    }
+  };
+
+  // 定期更新当前周数（每小时检查一次）
+  useEffect(() => {
+    if (settings?.autoUpdateWeek) {
+      updateCurrentWeek();
+      
+      const interval = setInterval(() => {
+        updateCurrentWeek();
+      }, 3600000); // 1小时 = 3600000毫秒
+      
+      return () => clearInterval(interval);
+    }
+  }, [settings?.autoUpdateWeek, settings?.semesterStartDate]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const value = {
     settings,
     updateSettings,
-    uploadBackgroundImage
+    uploadBackgroundImage,
+    getCurrentWeek,
+    updateCurrentWeek
   };
 
   return (
@@ -155,4 +197,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
       {children}
     </SettingsContext.Provider>
   );
-}; 
+};
+
+// 确保导出兼容HMR
+SettingsProvider.displayName = 'SettingsProvider'; 

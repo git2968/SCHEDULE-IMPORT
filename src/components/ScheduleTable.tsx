@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { Course } from '../types';
 import { useSchedule } from '../hooks/useSchedule';
+import { useSettings } from '../hooks/useSettings';
 import { exportScheduleToExcel } from '../utils/exportSchedule';
+import { getDateForWeekDay } from '../utils/dateUtils';
 
 // 媒体查询断点
 const MOBILE_BREAKPOINT = '768px';
@@ -86,10 +88,13 @@ const TableHeaderCell = styled.th<{ isCurrentDay?: boolean; isTimeColumn?: boole
   
   /* Make time column header match the width of time cells */
   ${props => props.isTimeColumn && `
-    width: 100px;
-    min-width: 100px;
-    max-width: 100px;
-    padding: 0.85rem 0.3rem;
+    width: 55px !important;  /* 强制设置宽度 */
+    min-width: 55px !important;
+    max-width: 55px !important;
+    padding: 0.3rem 0.05rem !important;  /* 匹配 TimeCell 的内边距 */
+    font-size: 0.85rem;
+    text-align: center !important;  /* 确保居中对齐 */
+    box-sizing: border-box !important;
   `}
   
   &:hover {
@@ -115,11 +120,30 @@ const TableHeaderCell = styled.th<{ isCurrentDay?: boolean; isTimeColumn?: boole
     padding: 0.7rem 0.5rem;
     
     ${props => props.isTimeColumn && `
-      width: 80px;
-      min-width: 80px;
-      max-width: 80px;
-      padding: 0.7rem 0.3rem;
+      width: 70px !important;  /* 移动端表头也需要匹配宽度 */
+      min-width: 70px !important;
+      max-width: 70px !important;
+      padding: 0.7rem 0.1rem !important;  /* 调整内边距 */
+      font-size: 0.8rem;
+      text-align: center !important;
+      box-sizing: border-box !important;
     `}
+  }
+`;
+
+const WeekdayText = styled.div`
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+`;
+
+const DateText = styled.div`
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.5);
+  
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    font-size: 0.75rem;
   }
 `;
 
@@ -139,8 +163,8 @@ const TableRow = styled.tr`
 
 // 调整TimeCell组件，优化手机端显示
 const TimeCell = styled.td`
-  padding: 0.6rem 0.2rem;
-  text-align: center;
+  padding: 0.3rem 0.05rem !important;  /* 强制应用内边距 */
+  text-align: center !important;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.75);
   background: rgba(255, 255, 255, 0.5);
@@ -148,65 +172,66 @@ const TimeCell = styled.td`
   font-size: 0.95rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
-  width: 100px;
-  min-width: 100px;
-  max-width: 100px;
-  height: 80px;
+  width: 55px !important;  /* 强制设置宽度 */
+  min-width: 55px !important;
+  max-width: 55px !important;
+  height: 70px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box !important;
   
   &:hover {
     background: rgba(255, 255, 255, 0.6);
   }
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    width: 100%;
-    min-width: unset; /* 移除最小宽度限制 */
-    max-width: 100%;
+    width: 70px !important;  /* 增加移动端宽度以容纳时间文本 */
+    min-width: 70px !important;
+    max-width: 70px !important;
     height: auto;
-    min-height: 70px;
+    min-height: 60px;
     flex-direction: row;
-    justify-content: flex-start; /* 靠左对齐 */
-    padding: 0.75rem 1rem;
+    justify-content: flex-start;
+    padding: 0.6rem 0.5rem !important;  /* 增加左右内边距 */
     border-radius: 18px;
     align-items: center;
     margin-bottom: 8px;
-    box-sizing: border-box;
-    background: rgba(240, 245, 255, 0.7); /* 浅蓝色背景，更容易区分是节次单元格 */
+    box-sizing: border-box !important;
+    background: rgba(240, 245, 255, 0.7);
   }
 `;
 
 // 调整SessionNumber组件
 const SessionNumber = styled.div`
   font-weight: 700;
-  font-size: ${props => props.children && String(props.children).length > 1 ? '1.1rem' : '1.2rem'};
+  font-size: ${props => props.children && String(props.children).length > 1 ? '0.9rem' : '1rem'};  /* 进一步缩小字体 */
   margin-bottom: 4px;
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     margin-bottom: 0;
-    margin-right: 20px; /* 增加与时间的间距 */
-    min-width: 30px;
+    margin-right: 10px; /* 增加间距以适应更宽的容器 */
+    min-width: 24px;  /* 增加最小宽度 */
     text-align: center;
-    font-size: 1.6rem; /* 显著增大字号 */
+    font-size: 1.2rem; /* 缩小字号 */
     font-weight: 700;
-    color: rgba(10, 132, 255, 0.9); /* 添加蓝色，增强辨识度 */
+    color: rgba(10, 132, 255, 0.9);
   }
 `;
 
 // 调整SessionTime组件
 const SessionTime = styled.div`
-  font-size: 0.9rem;
+  font-size: 0.8rem;  /* 稍微缩小字体以适应更窄的列 */
   color: rgba(0, 0, 0, 0.7);
   font-weight: 600;
   line-height: 1.2;
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    font-size: 1.05rem;
+    font-size: 0.8rem;  /* 调整移动端字体以适应更宽的容器 */
     font-weight: 500;
-    white-space: nowrap; /* 防止时间换行 */
-    overflow: visible; /* 确保完整显示 */
+    white-space: nowrap;
+    overflow: visible;
     color: rgba(0, 0, 0, 0.65);
   }
 `;
@@ -221,31 +246,28 @@ const TableCell = styled.td<{ 'data-has-content'?: boolean; isCurrentDay?: boole
   border-radius: 20px;
   background: ${props => {
     if (props['data-has-content']) return 'transparent';
-    return props.isCurrentDay ? 'rgba(10, 132, 255, 0.05)' : 'rgba(255, 255, 255, 0.3)';
+    return 'transparent';  /* 空课时也设为透明，但保持正常的布局和尺寸 */
   }};
   transition: all 0.2s ease;
   
   &:hover {
     background: ${props => {
       if (props['data-has-content']) return 'transparent';
-      return props.isCurrentDay ? 'rgba(10, 132, 255, 0.08)' : 'rgba(255, 255, 255, 0.4)';
+      return 'transparent';
     }};
   }
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     width: 100%;
     height: auto;
-    min-height: 70px;
+    min-height: 70px;  /* 保持固定最小高度，避免影响布局 */
     margin-bottom: 8px;
-    background: ${props => {
-      if (props['data-has-content']) return 'transparent';
-      return props.isCurrentDay ? 'rgba(10, 132, 255, 0.05)' : 'rgba(255, 255, 255, 0.6)';
-    }};
+    background: transparent;
     border-radius: 16px;
   }
 `;
 
-// 优化课程项目样式
+// 优化课程项目样式 - 确保对齐
 const CourseItem = styled.div<{ background?: string }>`
   background: ${props => props.background || 'rgba(10, 132, 255, 0.15)'};
   border-radius: 12px;
@@ -260,6 +282,8 @@ const CourseItem = styled.div<{ background?: string }>`
   transition: all 0.25s ease;
   cursor: default;
   position: relative;
+  /* 确保所有课程项目的高度一致 */
+  min-height: 60px;
   
   &:hover {
     transform: translateY(-2px);
@@ -270,6 +294,8 @@ const CourseItem = styled.div<{ background?: string }>`
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     padding: 0.8rem 0.6rem;
+    /* 移动端也保持最小高度 */
+    min-height: 60px;
   }
 `;
 
@@ -332,20 +358,49 @@ const MobileDaySelector = styled.div`
 
 // 调整移动端表格的总体布局
 const MobileDayButton = styled.button<{ isActive?: boolean }>`
-  background: ${props => props.isActive ? 'rgba(10, 132, 255, 0.2)' : 'rgba(255, 255, 255, 0.6)'};
-  border: none;
-  border-radius: 12px;
-  padding: 8px 16px;
+  background: ${props => props.isActive 
+    ? 'linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(64, 210, 255, 0.15))' 
+    : 'rgba(255, 255, 255, 0.7)'};
+  border: ${props => props.isActive ? '1px solid rgba(10, 132, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.2)'};
+  border-radius: 16px;
+  padding: 10px 16px;
   margin-right: 8px;
-  font-size: 0.95rem; /* 增大按钮字体 */
+  font-size: 0.9rem;
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.8);
+  color: ${props => props.isActive ? 'rgba(10, 132, 255, 0.9)' : 'rgba(0, 0, 0, 0.7)'};
   white-space: nowrap;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  transition: all 0.2s ease;
+  box-shadow: ${props => props.isActive 
+    ? '0 2px 8px rgba(10, 132, 255, 0.15)' 
+    : '0 1px 4px rgba(0, 0, 0, 0.05)'};
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: ${props => props.isActive 
+      ? '0 4px 12px rgba(10, 132, 255, 0.2)' 
+      : '0 2px 8px rgba(0, 0, 0, 0.08)'};
+  }
   
   &:last-child {
     margin-right: 0;
   }
+`;
+
+const MobileDayText = styled.div`
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 3px;
+`;
+
+const MobileDateText = styled.div`
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.8;
 `;
 
 const fadeIn = keyframes`
@@ -644,11 +699,11 @@ const cleanCourseName = (name: string): string => {
   return nameWithoutCode || name;
 };
 
-// Helper function to extract course code
-const extractCourseCode = (name: string): string => {
-  const match = name.match(/\[(\d+)\]/);
-  return match ? match[1] : '无';
-};
+// Helper function to extract course code (currently unused, kept for future use)
+// const extractCourseCode = (name: string): string => {
+//   const match = name.match(/\[(\d+)\]/);
+//   return match ? match[1] : '无';
+// };
 
 // 添加组件props接口
 interface ScheduleTableProps {
@@ -708,90 +763,157 @@ const ViewToggleButton = styled.button`
   }
 `;
 
-// 添加一个简单的弹出信息组件，用于显示详细时间
+// 极简现代化的课程详情弹窗
 const CoursePressTooltip = styled.div`
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 20px;
-  margin: 0 auto;
-  width: 90%;
-  max-width: 350px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 88%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  padding: 0;
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 8px 16px rgba(0, 0, 0, 0.06);
   z-index: 1100;
-  animation: ${fadeIn} 0.2s ease-out;
+  animation: ${fadeIn} 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
+  overflow: hidden;
   
-  @media (max-width: ${MOBILE_BREAKPOINT}) {
-    padding: 14px;
+  /* 确保在键盘弹出时不被遮挡 */
+  @media (max-height: 600px) {
+    top: 45%;
+    max-height: 350px;
+    overflow-y: auto;
   }
 `;
 
 const CourseTooltipHeader = styled.div`
-  font-size: 1rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8));
+  padding: 24px 24px 20px;
+  border-radius: 24px 24px 0 0;
+  margin: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  
+  font-size: 1.3rem;
   font-weight: 700;
-  margin-bottom: 10px;
   color: rgba(0, 0, 0, 0.85);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding-bottom: 8px;
+  line-height: 1.3;
+  text-align: center;
+  
+  /* 添加课程图标 */
+  position: relative;
+  &:before {
+    content: '📚';
+    font-size: 1.5rem;
+    margin-right: 8px;
+  }
 `;
 
 const CourseTooltipRow = styled.div`
   display: flex;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
   align-items: center;
+  padding: 16px 24px;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.01);
+  }
   
   &:last-child {
-    margin-bottom: 0;
+    padding-bottom: 24px;
+  }
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   }
 `;
 
 const CourseTooltipLabel = styled.div`
   font-weight: 600;
-  width: 70px;
+  font-size: 0.9rem;
+  width: 90px;
   color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
 `;
 
 const CourseTooltipValue = styled.div`
   font-weight: 500;
+  font-size: 1rem;
   color: rgba(0, 0, 0, 0.8);
   flex: 1;
+  line-height: 1.4;
+  
+  /* 特殊样式处理 */
+  &.time-value {
+    color: rgba(0, 0, 0, 0.85);
+    font-weight: 600;
+    font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  }
+  
+  &.location-value {
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: 500;
+  }
 `;
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 24px;
-  height: 24px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.1);
+  top: 12px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.05);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.6);
+  color: rgba(0, 0, 0, 0.4);
   cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
   
   &:hover {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.08);
+    color: rgba(0, 0, 0, 0.6);
+    transform: scale(1.1);
+  }
+  
+  &:active {
+    transform: scale(0.9);
   }
   
   &::before {
-    content: "×";
+    content: "✕";
+    font-weight: 400;
+    line-height: 1;
   }
 `;
 
 const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
   const scheduleContext = useSchedule();
+  const { settings, getCurrentWeek } = useSettings();
   // 使用props或从context中获取数据
   const contextSchedule = scheduleContext.currentSchedule;
-  const [currentWeek, setCurrentWeek] = useState(props.currentWeek || 1);
+  // 优先使用设置中的当前周数，但避免在初始化时调用函数
+  const [currentWeek, setCurrentWeek] = useState(() => {
+    if (props.currentWeek) {
+      return props.currentWeek;
+    }
+    // 只在初始化时调用一次getCurrentWeek
+    return getCurrentWeek();
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
@@ -828,6 +950,16 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
       setSelectedDay(today === 0 ? 7 : today);
     }
   }, [isMobileView, selectedDay]);
+
+  // 同步设置中的当前周数
+  useEffect(() => {
+    if (!props.currentWeek) { // 只有在没有传入props的情况下才使用设置
+      const settingsWeek = getCurrentWeek();
+      if (settingsWeek !== currentWeek) {
+        setCurrentWeek(settingsWeek);
+      }
+    }
+  }, [settings?.currentWeek, settings?.semesterStartDate, settings?.autoUpdateWeek, props.currentWeek]); // 直接依赖设置值，避免函数引用问题
   
   // 保留时间数据，但不再提供编辑功能
   const [sessionTimes] = useState<SessionTime[]>([
@@ -885,6 +1017,12 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
   
   // 星期几的标题
   const weekdays = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+  
+  // 获取指定星期几的日期字符串
+  const getDateString = (dayOfWeek: number): string => {
+    if (!settings?.semesterStartDate) return '';
+    return getDateForWeekDay(settings.semesterStartDate, currentWeek, dayOfWeek);
+  };
   
   // 节次信息
   const sessionSlots = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -981,15 +1119,15 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
     setActiveTooltip(instanceId);
   };
 
-  // 处理课程点击事件
-  const handleCourseClick = (course: Course, session: number) => {
-    setClickedCourse({ course, session });
-    
-    // 3秒后自动关闭
-    setTimeout(() => {
-      setClickedCourse(null);
-    }, 5000);
-  };
+  // 处理课程点击事件 (currently unused, kept for future use)
+  // const handleCourseClick = (course: Course, session: number) => {
+  //   setClickedCourse({ course, session });
+  //   
+  //   // 3秒后自动关闭
+  //   setTimeout(() => {
+  //     setClickedCourse(null);
+  //   }, 5000);
+  // };
   
   // 关闭课程信息
   const handleCloseTooltip = () => {
@@ -1039,7 +1177,8 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                   key={index}
                   isCurrentDay={index + 1 === currentDay}
                 >
-                  {day}
+                  <WeekdayText>{day}</WeekdayText>
+                  <DateText>{getDateString(index + 1)}</DateText>
                 </TableHeaderCell>
               ))}
             </tr>
@@ -1085,9 +1224,12 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                             onMouseEnter={(e) => handleCourseMouseEnter(e, getCourseInstanceId(course, day, session))}
                             onMouseLeave={() => setActiveTooltip(null)}
                           >
-                            {isMobileView && course.startSession !== course.endSession && (
-                              <CourseSessionBadge>第 {course.startSession}-{course.endSession} 节</CourseSessionBadge>
-                            )}
+                            {/* 为所有课程显示节数，不仅仅是移动端 */}
+                            <CourseSessionBadge>
+                              {course.startSession === course.endSession 
+                                ? `第${course.startSession}节` 
+                                : `第${course.startSession}-${course.endSession}节`}
+                            </CourseSessionBadge>
                             <CourseName>{cleanCourseName(course.name)}</CourseName>
                             <CourseLocation>{course.location}</CourseLocation>
                           </CourseItem>
@@ -1133,13 +1275,61 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                 isActive={index + 1 === selectedDay}
                 onClick={() => handleDayChange(index + 1)}
               >
-                {day}
+                <MobileDayText>{day}</MobileDayText>
+                <MobileDateText>{getDateString(index + 1)}</MobileDateText>
               </MobileDayButton>
             ))}
           </MobileDaySelector>
           
           <ScrollContainer>
             <Table>
+              <TableHeader>
+                <tr>
+                  <TableHeaderCell 
+                    isTimeColumn={true} 
+                    style={{ 
+                      width: '80px', 
+                      minWidth: '80px',
+                      padding: '1rem 0.5rem',
+                      fontSize: '0.9rem',
+                      fontWeight: '500',
+                      borderRadius: '16px' // 统一使用移动端16px圆角
+                    }}
+                  >
+                    时间
+                  </TableHeaderCell>
+                  <TableHeaderCell 
+                    isCurrentDay={selectedDay === currentDay}
+                    style={{ 
+                      textAlign: 'center',
+                      padding: '1rem',
+                      borderRadius: '16px', // 统一使用移动端16px圆角
+                      background: selectedDay === currentDay 
+                        ? 'linear-gradient(135deg, rgba(10, 132, 255, 0.15), rgba(64, 210, 255, 0.1))' 
+                        : 'rgba(255, 255, 255, 0.7)',
+                      border: selectedDay === currentDay 
+                        ? '1px solid rgba(10, 132, 255, 0.2)' 
+                        : 'none'
+                    }}
+                  >
+                    <WeekdayText style={{ 
+                      fontSize: '1.1rem', 
+                      marginBottom: '0.3rem',
+                      fontWeight: '600',
+                      color: selectedDay === currentDay ? 'rgba(10, 132, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)'
+                    }}>
+                      {weekdays[selectedDay]}
+                    </WeekdayText>
+                    <DateText style={{ 
+                      fontSize: '0.85rem',
+                      color: selectedDay === currentDay ? 'rgba(10, 132, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                      fontWeight: '500'
+                    }}>
+                      {getDateString(selectedDay)}
+                    </DateText>
+                  </TableHeaderCell>
+                </tr>
+              </TableHeader>
               <TableBody>
                 {sessionSlots.map(session => {
                   const course = getCourseForSessionAndDay(session, selectedDay);
@@ -1186,20 +1376,56 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
         </>
       ) : (
         // 周视图 - 显示整周的课表
-        <ScrollContainer>
-          <Table style={{ width: '100%', tableLayout: 'fixed' }}>
+        <ScrollContainer style={{ overflowX: 'auto', width: '100%' }}>
+          <Table style={{ width: '100%', tableLayout: 'fixed', minWidth: '600px' }}>
             <TableHeader>
               <tr>
-                <TableHeaderCell isTimeColumn={true} style={{ width: '50px', minWidth: '50px' }}>
-                  节
+                <TableHeaderCell 
+                  isTimeColumn={true} 
+                  style={{ 
+                    width: '80px', 
+                    minWidth: '80px',
+                    padding: '0.6rem 0.3rem',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    borderRadius: '16px'
+                  }}
+                >
+                  节次
                 </TableHeaderCell>
                 {weekdays.slice(1).map((day, index) => (
                   <TableHeaderCell 
                     key={index}
                     isCurrentDay={index + 1 === currentDay}
-                    style={{ padding: '0.4rem', fontSize: '0.85rem', width: '14%' }}
+                    style={{ 
+                      padding: '0.5rem 0.2rem', 
+                      fontSize: '0.8rem', 
+                      width: '75px',
+                      minWidth: '75px',
+                      borderRadius: '16px',
+                      background: index + 1 === currentDay 
+                        ? 'linear-gradient(135deg, rgba(10, 132, 255, 0.15), rgba(64, 210, 255, 0.1))' 
+                        : 'rgba(255, 255, 255, 0.7)',
+                      border: index + 1 === currentDay 
+                        ? '1px solid rgba(10, 132, 255, 0.2)' 
+                        : 'none'
+                    }}
                   >
-                    {day}
+                    <WeekdayText style={{ 
+                      fontSize: '0.8rem', 
+                      marginBottom: '0.1rem',
+                      fontWeight: '600',
+                      color: index + 1 === currentDay ? 'rgba(10, 132, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)'
+                    }}>
+                      {day}
+                    </WeekdayText>
+                    <DateText style={{ 
+                      fontSize: '0.7rem',
+                      fontWeight: '500',
+                      color: index + 1 === currentDay ? 'rgba(10, 132, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)'
+                    }}>
+                      {getDateString(index + 1)}
+                    </DateText>
                   </TableHeaderCell>
                 ))}
               </tr>
@@ -1207,18 +1433,35 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
             
             <TableBody>
               {sessionSlots.map(session => (
-                <TableRow key={session} style={{ display: 'table-row' }}>
+                <TableRow key={session} style={{ display: 'table-row', height: 'auto', minHeight: '70px' }}>
                   <TimeCell style={{ 
-                    width: '50px', 
+                    width: '50px !important',  /* 强制宽度 */
                     minWidth: '50px',
+                    maxWidth: '50px',
                     height: '60px',
-                    padding: '0.3rem',
+                    padding: '0.25rem 0.05rem !important',  /* 强制内边距 */
                     fontSize: '0.8rem',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    boxSizing: 'border-box',
+                    textAlign: 'center'
                   }}>
-                    <SessionNumber style={{ fontSize: '1rem', marginBottom: '2px' }}>{session}</SessionNumber>
-                    <SessionTime style={{ fontSize: '0.65rem' }}>
-                      {sessionTimes[session - 1]?.start}
+                    <SessionNumber style={{ 
+                      fontSize: '0.9rem',  /* 进一步缩小字体 */
+                      marginBottom: '4px',
+                      fontWeight: '700',
+                      color: 'rgba(10, 132, 255, 0.8)'
+                    }}>
+                      {session}
+                    </SessionNumber>
+                    <SessionTime style={{ 
+                      fontSize: '0.7rem',  /* 缩小时间字体 */
+                      fontWeight: '500',
+                      color: 'rgba(0, 0, 0, 0.6)',
+                      textAlign: 'center'
+                    }}>
+                      {sessionTimes[session - 1]?.start}-{sessionTimes[session - 1]?.end}
                     </SessionTime>
                   </TimeCell>
                   
@@ -1237,52 +1480,88 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                         data-has-content={!!course}
                         isCurrentDay={day === currentDay}
                         style={{ 
-                          width: '14%',
-                          height: '60px',
-                          padding: '0.2rem',
+                          width: '75px',
+                          minWidth: '75px',
+                          height: '70px',  /* 保持固定高度 */
+                          padding: '3px',  /* 保持固定内边距 */
                           marginBottom: '0',
-                          background: course ? 'transparent' : 'rgba(255, 255, 255, 0.3)', // 所有无课单元格使用相同背景色
+                          background: 'transparent',  /* 透明背景 */
                           boxSizing: 'border-box',
-                          border: '1px solid transparent' // 添加边框防止塌陷
+                          border: 'none',  /* 移除边框 */
+                          borderRadius: '16px',
+                          verticalAlign: 'top'
                         }}
                         rowSpan={course && course.startSession !== course.endSession ? 
-                                 course.endSession - course.startSession + 1 : 1}
+                                 course.endSession - course.startSession + 1 : 1}  /* 恢复正确的rowSpan逻辑 */
                       >
                         {course && (
                           <CourseItem 
                             background={getCourseColor(course.courseId)}
-                            style={{ padding: '0.25rem', height: '100%' }}
+                            style={{ 
+                              padding: '4px 3px', 
+                              height: course.startSession !== course.endSession ? 
+                                     `${70 * (course.endSession - course.startSession + 1) + 6 * (course.endSession - course.startSession)}px` : 
+                                     '70px',  /* 单节课也使用70px高度，和其他行保持一致 */
+                              borderRadius: '12px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              position: 'relative',
+                              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)'
+                            }}
+                            onMouseEnter={(e) => handleCourseMouseEnter(e, getCourseInstanceId(course, day, session))}
+                            onMouseLeave={() => setActiveTooltip(null)}
+                            onClick={(e) => isMobileView && handleCourseMouseEnter(e, getCourseInstanceId(course, day, session))}
                           >
-                            {/* 添加多节课程的节次范围标识 */}
-                            {course.startSession !== course.endSession && (
-                              <div style={{
-                                fontSize: '0.6rem',
-                                fontWeight: 'bold',
-                                color: 'rgba(10, 132, 255, 0.9)',
-                                marginBottom: '2px',
-                                background: 'rgba(10, 132, 255, 0.1)',
-                                padding: '1px 4px',
-                                borderRadius: '8px',
-                                display: 'inline-block'
-                              }}>
-                                {course.startSession}-{course.endSession}节
-                              </div>
-                            )}
+                            {/* 为所有课程显示节数标识 */}
+                            <div style={{
+                              position: 'absolute',
+                              top: '4px',
+                              right: '4px',
+                              fontSize: '0.6rem',
+                              fontWeight: '600',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              color: 'rgba(0, 0, 0, 0.7)',
+                              padding: '2px 5px',
+                              borderRadius: '8px'
+                            }}>
+                              {course.startSession === course.endSession 
+                                ? `${course.startSession}节` 
+                                : `${course.startSession}-${course.endSession}节`}
+                            </div>
                             <CourseName style={{ 
-                              fontSize: '0.7rem', 
-                              marginBottom: '0',
+                              fontSize: '0.65rem', 
+                              fontWeight: '700',
+                              marginBottom: '1px',
+                              color: 'rgba(255, 255, 255, 0.95)',
+                              textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+                              textAlign: 'center',
+                              lineHeight: '1.1',
                               overflow: 'hidden',
-                              textOverflow: 'ellipsis',
                               display: '-webkit-box',
                               WebkitLineClamp: 2,
                               WebkitBoxOrient: 'vertical',
-                              maxWidth: '100%',
-                              textAlign: 'center'
+                              wordBreak: 'break-all'
                             }}>
                               {cleanCourseName(course.name).length > 6 
-                                ? cleanCourseName(course.name).substring(0, 5) + '...' 
+                                ? cleanCourseName(course.name).substring(0, 5) + '..' 
                                 : cleanCourseName(course.name)}
                             </CourseName>
+                            {course.location && (
+                              <CourseLocation style={{
+                                fontSize: '0.55rem',
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+                                textAlign: 'center',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                maxWidth: '100%'
+                              }}>
+                                {course.location.length > 6 ? course.location.substring(0, 5) + '..' : course.location}
+                              </CourseLocation>
+                            )}
                           </CourseItem>
                         )}
                       </TableCell>
@@ -1371,22 +1650,40 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
       
       {/* 课程点击后显示的信息 */}
       {isMobileView && clickedCourse && (
-        <CoursePressTooltip>
-          <CloseButton onClick={handleCloseTooltip} />
-          <CourseTooltipHeader>{cleanCourseName(clickedCourse.course.name)}</CourseTooltipHeader>
-          <CourseTooltipRow>
-            <CourseTooltipLabel>时间:</CourseTooltipLabel>
-            <CourseTooltipValue>{getCourseTimeRange(clickedCourse.course)}</CourseTooltipValue>
-          </CourseTooltipRow>
-          <CourseTooltipRow>
-            <CourseTooltipLabel>地点:</CourseTooltipLabel>
-            <CourseTooltipValue>{clickedCourse.course.location}</CourseTooltipValue>
-          </CourseTooltipRow>
-          <CourseTooltipRow>
-            <CourseTooltipLabel>教师:</CourseTooltipLabel>
-            <CourseTooltipValue>{clickedCourse.course.teacher || '未设置'}</CourseTooltipValue>
-          </CourseTooltipRow>
-        </CoursePressTooltip>
+        <>
+          {/* 背景遮罩 */}
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.2)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 1090,
+              animation: `${fadeIn} 0.2s ease-out`
+            }}
+            onClick={handleCloseTooltip}
+          />
+          
+          <CoursePressTooltip>
+            <CloseButton onClick={handleCloseTooltip} />
+            <CourseTooltipHeader>{cleanCourseName(clickedCourse.course.name)}</CourseTooltipHeader>
+            <CourseTooltipRow>
+              <CourseTooltipLabel>⏰ 时间</CourseTooltipLabel>
+              <CourseTooltipValue className="time-value">{getCourseTimeRange(clickedCourse.course)}</CourseTooltipValue>
+            </CourseTooltipRow>
+            <CourseTooltipRow>
+              <CourseTooltipLabel>📍 地点</CourseTooltipLabel>
+              <CourseTooltipValue className="location-value">{clickedCourse.course.location}</CourseTooltipValue>
+            </CourseTooltipRow>
+            <CourseTooltipRow>
+              <CourseTooltipLabel>👨‍🏫 教师</CourseTooltipLabel>
+              <CourseTooltipValue>{clickedCourse.course.teacher || '未设置'}</CourseTooltipValue>
+            </CourseTooltipRow>
+          </CoursePressTooltip>
+        </>
       )}
       
       {/* 根据屏幕大小渲染不同的表格 */}

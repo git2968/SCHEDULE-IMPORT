@@ -41,6 +41,7 @@ const BackgroundImage = styled.div<{ $url: string }>`
 const Main = styled.main`
   flex: 1;
   padding: 0 1rem;
+  padding-bottom: 80px;  /* 为固定的Footer留出空间 */
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
@@ -49,6 +50,7 @@ const Main = styled.main`
   
   @media (min-width: 1200px) {
     padding: 0 2rem;
+    padding-bottom: 80px;  /* 为固定的Footer留出空间 */
   }
 `;
 

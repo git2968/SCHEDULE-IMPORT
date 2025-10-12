@@ -54,7 +54,6 @@ const Dashboard: React.FC = () => {
             {currentSchedule ? (
               <ScheduleTable 
                 courses={currentSchedule.courses}
-                currentWeek={1}
                 totalWeeks={currentSchedule.totalWeeks}
               />
             ) : (
