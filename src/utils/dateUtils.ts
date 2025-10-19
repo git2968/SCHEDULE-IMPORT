@@ -12,21 +12,56 @@ export const getDaysDifference = (startDate: Date, endDate: Date): number => {
 
 /**
  * 根据学期开始日期计算当前是第几周
+ * 注意：这里按照完整的自然周计算（周一到周日为一周）
  */
 export const calculateCurrentWeek = (semesterStartDate: string): number => {
   if (!semesterStartDate) return 1;
   
   try {
-    const startDate = new Date(semesterStartDate);
+    // 使用 UTC 时间避免时区问题
+    const startParts = semesterStartDate.split('-');
+    const startYear = parseInt(startParts[0], 10);
+    const startMonth = parseInt(startParts[1], 10) - 1; // 月份从0开始
+    const startDay = parseInt(startParts[2], 10);
+    const startDate = new Date(startYear, startMonth, startDay);
+    
     const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // 重置到当天0点
     
     // 如果当前日期早于学期开始日期，返回第1周
     if (currentDate < startDate) {
       return 1;
     }
     
-    const daysDiff = getDaysDifference(startDate, currentDate);
+    // 找到学期开始日期所在周的周一
+    const startDayOfWeek = startDate.getDay(); // 0=周日, 1=周一, ..., 6=周六
+    const daysToMonday = startDayOfWeek === 0 ? -6 : 1 - startDayOfWeek;
+    const weekStartDate = new Date(startDate);
+    weekStartDate.setDate(startDate.getDate() + daysToMonday);
+    weekStartDate.setHours(0, 0, 0, 0);
+    
+    // 找到当前日期所在周的周一
+    const currentDayOfWeek = currentDate.getDay();
+    const currentDaysToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+    const currentWeekStartDate = new Date(currentDate);
+    currentWeekStartDate.setDate(currentDate.getDate() + currentDaysToMonday);
+    currentWeekStartDate.setHours(0, 0, 0, 0);
+    
+    // 计算两个周一之间相差多少天
+    const daysDiff = Math.floor((currentWeekStartDate.getTime() - weekStartDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // 计算周数：相差的天数除以7，再加1（因为第1周从0开始算）
     const weekNumber = Math.floor(daysDiff / 7) + 1;
+    
+    // 调试信息
+    console.log('📅 周数计算详情:', {
+      学期开始日期: semesterStartDate,
+      学期开始周一: formatDateForInput(weekStartDate),
+      今天日期: formatDateForInput(currentDate),
+      当前周一: formatDateForInput(currentWeekStartDate),
+      相差天数: daysDiff,
+      计算周数: weekNumber
+    });
     
     return Math.max(1, weekNumber);
   } catch (error) {
@@ -119,32 +154,38 @@ export const isValidDateString = (dateString: string): boolean => {
 
 /**
  * 根据当前日期和当前周数逆推学期开始日期
+ * 修正逻辑：先找到今天所在周的周一，再往回推
  */
 export const calculateSemesterStartDate = (currentWeekNumber: number, currentDate?: Date): string => {
   const today = currentDate || new Date();
+  today.setHours(0, 0, 0, 0); // 重置到0点避免时区问题
   
   if (currentWeekNumber < 1) {
     console.error('Current week number must be at least 1');
     return getTodayString();
   }
   
-  // 计算学期开始日期：当前日期 - (当前周数 - 1) * 7天
-  const daysFromStart = (currentWeekNumber - 1) * 7;
-  const semesterStartDate = new Date(today);
-  semesterStartDate.setDate(today.getDate() - daysFromStart);
+  // 1. 先找到今天所在周的周一
+  const todayDayOfWeek = today.getDay(); // 0=周日, 1=周一, ..., 6=周六
+  const daysToCurrentMonday = todayDayOfWeek === 0 ? -6 : 1 - todayDayOfWeek;
+  const currentWeekMonday = new Date(today);
+  currentWeekMonday.setDate(today.getDate() + daysToCurrentMonday);
+  currentWeekMonday.setHours(0, 0, 0, 0);
   
-  // 找到该周的周一作为学期开始日期
-  const dayOfWeek = semesterStartDate.getDay(); // 0=周日, 1=周一, ..., 6=周六
-  const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // 计算到周一的天数差
-  semesterStartDate.setDate(semesterStartDate.getDate() + daysToMonday);
+  // 2. 从当前周的周一往回推到第1周的周一
+  // 当前是第 currentWeekNumber 周，要回到第1周，需要回退 (currentWeekNumber - 1) 周
+  const weeksToGoBack = currentWeekNumber - 1;
+  const semesterStartDate = new Date(currentWeekMonday);
+  semesterStartDate.setDate(currentWeekMonday.getDate() - (weeksToGoBack * 7));
   
   return formatDateForInput(semesterStartDate);
 };
 
 /**
  * 验证逆推计算的结果是否合理
+ * 修正后的逻辑应该完全匹配，不允许误差
  */
 export const validateReverseCalculation = (semesterStartDate: string, expectedWeek: number): boolean => {
   const calculatedWeek = calculateCurrentWeek(semesterStartDate);
-  return Math.abs(calculatedWeek - expectedWeek) <= 1; // 允许1周的误差
+  return calculatedWeek === expectedWeek; // 应该完全匹配
 };

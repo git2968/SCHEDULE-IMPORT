@@ -11,9 +11,14 @@ import AnimatedList from '../components/animations/AnimatedList';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 const PageContainer = styled.div`
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   max-width: 95%;
   margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem 0;
+    max-width: 100%;
+  }
 `;
 
 const PageTitle = styled.h1`
@@ -32,6 +37,11 @@ const ContentCard = styled(GlassCard)`
   width: 100%;
   margin: 0 auto;
   padding: 1.5rem;
+  
+  @media (max-width: 768px) {
+    padding: 0.8rem;
+    border-radius: 12px;
+  }
 `;
 
 const Header = styled.div`
@@ -41,12 +51,23 @@ const Header = styled.div`
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid rgba(10, 132, 255, 0.1);
+  gap: 0.5rem;
+  flex-wrap: wrap;
   
   h2 {
     font-size: 1.4rem;
     font-weight: 700;
     color: rgba(0, 0, 0, 0.85);
     margin: 0;
+  }
+  
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    
+    h2 {
+      font-size: 1.2rem;
+    }
   }
 `;
 

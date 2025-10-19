@@ -25,8 +25,8 @@ const FirstVisitRedirect: React.FC = () => {
     if (location.pathname === '/') {
       // 延迟一下，确保Context已经初始化
       const timer = setTimeout(() => {
-        // 首次访问进入应用中心
-        navigate('/app-center', { replace: true });
+        // 首次访问进入课表应用
+        navigate('/apps/schedule', { replace: true });
       }, 100);
       
       return () => clearTimeout(timer);

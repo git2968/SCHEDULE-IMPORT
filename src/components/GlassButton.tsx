@@ -104,6 +104,30 @@ const StyledButton = styled.button<{
     transform: translateY(0);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
+  
+  @media (max-width: 768px) {
+    font-size: ${props => {
+      switch (props.size) {
+        case 'small':
+          return '0.8rem';
+        case 'large':
+          return '1rem';
+        default:
+          return '0.9rem';
+      }
+    }};
+    padding: ${props => {
+      switch (props.size) {
+        case 'small':
+          return '0.45rem 0.9rem';
+        case 'large':
+          return '0.9rem 1.8rem';
+        default:
+          return '0.65rem 1.3rem';
+      }
+    }};
+    border-radius: 10px;
+  }
 `;
 
 const GlassButton: React.FC<GlassButtonProps> = ({

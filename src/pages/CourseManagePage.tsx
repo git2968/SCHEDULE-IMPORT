@@ -12,9 +12,14 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import CustomSelect from '../components/CustomSelect';
 
 const PageContainer = styled.div`
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   max-width: 95%;
   margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem 0;
+    max-width: 100%;
+  }
 `;
 
 const ContentCard = styled(GlassCard)`
@@ -23,7 +28,8 @@ const ContentCard = styled(GlassCard)`
   padding: 2rem;
   
   @media (max-width: 768px) {
-    padding: 1.5rem;
+    padding: 0.8rem;
+    border-radius: 12px;
   }
 `;
 

@@ -18,26 +18,33 @@ import Icon from '../components/Icon';
 import { useNavigate } from 'react-router-dom';
 
 const PageContainer = styled.div`
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   max-width: 95%;
   margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem 0;
+    max-width: 100%;
+  }
 `;
 
 const ContentCard = styled(GlassCard)`
   width: 100%;
   margin: 0 auto;
   padding: 1.5rem;
-`;
-
-const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    padding: 0.8rem;
+    border-radius: 12px;
+  }
 `;
 
 const TabContent = styled.div`
   padding-top: 1rem;
+  
+  @media (max-width: 768px) {
+    padding-top: 0.75rem;
+  }
 `;
 
 const NoSchedulePrompt = styled.div`
@@ -67,25 +74,37 @@ const NoSchedulePrompt = styled.div`
     margin-bottom: 2rem;
     line-height: 1.6;
   }
+  
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+    
+    .icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    p {
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+  }
 `;
 
 const ScheduleApp: React.FC = () => {
   const { currentSchedule } = useSchedule();
   const navigate = useNavigate();
   
-  // 初始化：如果没有课表，默认显示导入Tab；否则显示课表Tab
-  const [activeTab, setActiveTab] = useState(() => {
-    return currentSchedule ? 'schedule' : 'import';
-  });
+  // 初始化：默认显示课表Tab
+  const [activeTab, setActiveTab] = useState('schedule');
 
   return (
     <PageContainer>
-      <Header>
-        <AnimatedPageTitle title="YUE的课表" />
-        <GlassButton onClick={() => navigate('/app-center')}>
-          <Icon name="arrow-left" /> 返回应用中心
-        </GlassButton>
-      </Header>
+      <AnimatedPageTitle title="YUE的课表" />
       
       <ContentCard>
         <GlassTabs activeTab={activeTab} onTabChange={setActiveTab}>

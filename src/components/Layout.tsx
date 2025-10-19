@@ -48,6 +48,11 @@ const Main = styled.main`
   position: relative;
   z-index: 1;
   
+  @media (max-width: 768px) {
+    padding: 0 0.5rem;
+    padding-bottom: 70px;  /* 移动端Footer较小 */
+  }
+  
   @media (min-width: 1200px) {
     padding: 0 2rem;
     padding-bottom: 80px;  /* 为固定的Footer留出空间 */

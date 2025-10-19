@@ -6,7 +6,8 @@ import { useSettings } from '../hooks/useSettings';
 import GlassButton from './GlassButton';
 import GlassInput from './GlassInput';
 import Icon from './Icon';
-import { getTodayString, isValidDateString, calculateSemesterStartDate, validateReverseCalculation } from '../utils/dateUtils';
+import DatePicker from './DatePicker';
+import { getTodayString, isValidDateString, calculateSemesterStartDate } from '../utils/dateUtils';
 
 const SettingsContainer = styled.div`
   margin-bottom: 2rem;
@@ -120,8 +121,6 @@ const ScheduleSettings: React.FC = () => {
   // 逆推功能相关状态
   const [calculationMode, setCalculationMode] = useState<'forward' | 'reverse'>('forward');
   const [currentWeekInput, setCurrentWeekInput] = useState('');
-  const [calculatedStartDate, setCalculatedStartDate] = useState('');
-  const [showCalculationResult, setShowCalculationResult] = useState(false);
 
   // 同步设置数据
   useEffect(() => {
@@ -154,12 +153,6 @@ const ScheduleSettings: React.FC = () => {
       return;
     }
 
-    const parsedCurrentWeek = parseInt(currentWeek, 10);
-    if (isNaN(parsedCurrentWeek) || parsedCurrentWeek < 1 || parsedCurrentWeek > parsedTotalWeeks) {
-      toast.error(`当前周数应为1-${parsedTotalWeeks}之间的整数`);
-      return;
-    }
-
     if (!isValidDateString(semesterStartDate)) {
       toast.error('请输入正确的学期开始日期');
       return;
@@ -176,14 +169,13 @@ const ScheduleSettings: React.FC = () => {
         });
       }
 
-      // 保存应用设置
+      // 保存应用设置（强制开启自动更新）
       await updateSettings({
-        currentWeek: parsedCurrentWeek,
         semesterStartDate: semesterStartDate,
-        autoUpdateWeek: autoUpdateWeek
+        autoUpdateWeek: true // 强制开启自动更新
       });
       
-      toast.success('设置已保存');
+      toast.success('设置已保存', { toastId: 'settings-saved' });
     } catch (error) {
       console.error('Failed to save settings', error);
       toast.error('保存设置失败');
@@ -192,8 +184,8 @@ const ScheduleSettings: React.FC = () => {
     }
   };
 
-  // 处理逆推计算
-  const handleReverseCalculation = () => {
+  // 处理逆推计算 - 直接保存
+  const handleReverseCalculation = async () => {
     const weekNumber = parseInt(currentWeekInput, 10);
     
     if (isNaN(weekNumber) || weekNumber < 1 || weekNumber > 30) {
@@ -201,34 +193,53 @@ const ScheduleSettings: React.FC = () => {
       return;
     }
     
+    // 如果有课表名称要求但未输入，提示错误
+    if (currentSchedule && !scheduleName.trim()) {
+      toast.error('请输入课表名称');
+      return;
+    }
+    
+    // 验证总周数
+    const parsedTotalWeeks = parseInt(totalWeeks, 10);
+    if (currentSchedule && (isNaN(parsedTotalWeeks) || parsedTotalWeeks < 1 || parsedTotalWeeks > 30)) {
+      toast.error('总周数应为1-30之间的整数');
+      return;
+    }
+    
     try {
+      setSaving(true);
+      
       const calculatedDate = calculateSemesterStartDate(weekNumber);
       
-      // 验证计算结果
-      if (validateReverseCalculation(calculatedDate, weekNumber)) {
-        setCalculatedStartDate(calculatedDate);
-        setShowCalculationResult(true);
-        toast.success('计算成功！您可以选择应用这个日期');
-      } else {
-        toast.error('计算结果可能不准确，请检查输入的周数');
+      // 保存课表设置（如果有）
+      if (currentSchedule) {
+        await updateSchedule({
+          name: scheduleName.trim(),
+          totalWeeks: parsedTotalWeeks
+        });
       }
+      
+      // 保存应用设置（强制开启自动更新）
+      await updateSettings({
+        semesterStartDate: calculatedDate,
+        autoUpdateWeek: true
+      });
+      
+      // 清空输入
+      setCurrentWeekInput('');
+      
+      toast.success(`✅ 设置已保存！学期开始日期为 ${calculatedDate}`);
     } catch (error) {
-      console.error('Reverse calculation failed:', error);
-      toast.error('计算失败，请重试');
+      console.error('Failed to save settings', error);
+      toast.error('保存设置失败');
+    } finally {
+      setSaving(false);
     }
-  };
-
-  // 应用逆推计算的结果
-  const applyCalculatedDate = () => {
-    setSemesterStartDate(calculatedStartDate);
-    setShowCalculationResult(false);
-    toast.success('已应用计算结果');
   };
 
   // 切换计算模式
   const handleModeChange = (mode: 'forward' | 'reverse') => {
     setCalculationMode(mode);
-    setShowCalculationResult(false);
     setCurrentWeekInput('');
   };
   
@@ -297,13 +308,10 @@ const ScheduleSettings: React.FC = () => {
         {calculationMode === 'forward' ? (
           <FormGroup>
             <FormLabel htmlFor="semesterStartDate">学期开始日期</FormLabel>
-            <GlassInput
-              id="semesterStartDate"
-              type="date"
+            <DatePicker
               value={semesterStartDate}
-              onChange={(e) => setSemesterStartDate(e.target.value)}
-              required
-              fullWidth
+              onChange={setSemesterStartDate}
+              placeholder="请选择学期开始日期"
             />
             <SettingDescription>
               设置学期开始的日期，系统将根据此日期自动计算当前周数
@@ -326,93 +334,62 @@ const ScheduleSettings: React.FC = () => {
               <CalculateButton
                 type="button"
                 onClick={handleReverseCalculation}
-                disabled={!currentWeekInput}
+                disabled={!currentWeekInput || saving}
               >
-                🧮 计算学期开始日期
+                {saving ? '保存中...' : '✅ 应用此周数'}
               </CalculateButton>
-              
-              {showCalculationResult && (
-                <ResultDisplay>
-                  <ResultText>
-                    📊 计算结果：学期开始日期为 <strong>{calculatedStartDate}</strong>
-                  </ResultText>
-                  <CalculateButton
-                    type="button"
-                    onClick={applyCalculatedDate}
-                    style={{ marginTop: '0.5rem', marginRight: '0.5rem' }}
-                  >
-                    <Icon name="checkmark-circle" /> 应用这个日期
-                  </CalculateButton>
-                  <CalculateButton
-                    type="button"
-                    onClick={() => setShowCalculationResult(false)}
-                    style={{ marginTop: '0.5rem', background: 'rgba(255, 69, 58, 0.6)' }}
-                  >
-                    <Icon name="cross-circle" /> 重新计算
-                  </CalculateButton>
-                </ResultDisplay>
-              )}
             </ReverseCalculationContainer>
-            
-            <SettingDescription>
-              💡 如果您不知道具体的开学日期，可以输入今天是第几周，系统将自动计算出学期开始日期
-            </SettingDescription>
           </FormGroup>
         )}
 
         <FormGroup>
-          <CheckboxGroup>
-            <CheckboxInput
-              id="autoUpdateWeek"
-              type="checkbox"
-              checked={autoUpdateWeek}
-              onChange={(e) => setAutoUpdateWeek(e.target.checked)}
-            />
-            <CheckboxLabel htmlFor="autoUpdateWeek">
-              自动更新当前周数
-            </CheckboxLabel>
-          </CheckboxGroup>
-          <SettingDescription>
-            开启后，系统将根据当前日期和学期开始日期自动计算并更新当前周数
+          <SettingDescription style={{ 
+            background: 'linear-gradient(135deg, rgba(10, 132, 255, 0.12), rgba(64, 210, 255, 0.08))', 
+            padding: '1rem', 
+            borderRadius: '12px',
+            fontWeight: '600',
+            color: 'rgba(10, 132, 255, 0.95)',
+            border: '1.5px solid rgba(10, 132, 255, 0.2)',
+            boxShadow: '0 2px 8px rgba(10, 132, 255, 0.08)'
+          }}>
+            📅 系统自动计算当前周数：<br/>
+            <div style={{ 
+              marginTop: '0.5rem', 
+              fontSize: '0.95rem',
+              lineHeight: '1.8',
+              color: 'rgba(0, 0, 0, 0.8)'
+            }}>
+              • 学期开始日期：<strong>{semesterStartDate}</strong> 
+                {(() => {
+                  const d = new Date(semesterStartDate);
+                  const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                  return `(${days[d.getDay()]})`;
+                })()}<br/>
+              • 今天的日期：<strong>{getTodayString()}</strong>
+                {(() => {
+                  const d = new Date();
+                  const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                  return ` (${days[d.getDay()]})`;
+                })()}<br/>
+              • <span style={{ 
+                fontSize: '1.1rem', 
+                color: 'rgba(10, 132, 255, 1)',
+                fontWeight: '700'
+              }}>当前周数：第 {getCurrentWeek()} 周</span>
+            </div>
           </SettingDescription>
         </FormGroup>
-
-        {!autoUpdateWeek && (
-          <FormGroup>
-            <FormLabel htmlFor="currentWeek">当前周数</FormLabel>
-            <GlassInput
-              id="currentWeek"
-              type="number"
-              min="1"
-              max={totalWeeks}
-              value={currentWeek}
-              onChange={(e) => setCurrentWeek(e.target.value)}
-              placeholder="请输入当前周数"
-              required
-              fullWidth
-            />
-            <SettingDescription>
-              手动设置当前周数，关闭自动更新时生效
-            </SettingDescription>
-          </FormGroup>
-        )}
-
-        {autoUpdateWeek && (
-          <FormGroup>
-            <SettingDescription>
-              当前计算得出的周数：第 {getCurrentWeek()} 周
-            </SettingDescription>
-          </FormGroup>
-        )}
         
-        <FormActions>
-          <GlassButton
-            type="submit"
-            disabled={saving}
-          >
-            {saving ? '保存中...' : '保存设置'}
-          </GlassButton>
-        </FormActions>
+        {calculationMode === 'forward' && (
+          <FormActions>
+            <GlassButton
+              type="submit"
+              disabled={saving}
+            >
+              {saving ? '保存中...' : '保存设置'}
+            </GlassButton>
+          </FormActions>
+        )}
       </form>
     </SettingsContainer>
   );

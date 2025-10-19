@@ -26,6 +26,12 @@ const HeaderContainer = styled.header`
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: opacity 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 `;
 
 const Logo = styled(Link)`
@@ -33,9 +39,18 @@ const Logo = styled(Link)`
   font-weight: 700;
   color: var(--dark-text);
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   
   &:hover {
     color: var(--primary-color);
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    order: 1;
+    flex: 0 0 auto;
   }
 `;
 
@@ -43,6 +58,14 @@ const Nav = styled.nav`
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  
+  @media (max-width: 768px) {
+    order: 3;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
 `;
 
 const NavLink = styled(Link)`
@@ -50,15 +73,32 @@ const NavLink = styled(Link)`
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   
   &:hover {
     color: var(--primary-color);
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
   }
 `;
 
 const ButtonsContainer = styled.div`
   display: flex;
   gap: 1rem;
+  
+  @media (max-width: 768px) {
+    order: 2;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
 `;
 
 // 简洁的退出遮罩

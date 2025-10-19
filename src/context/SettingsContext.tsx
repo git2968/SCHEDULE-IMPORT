@@ -68,7 +68,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
           const parsedSettings = JSON.parse(storedUserSettings);
           setSettings({
             ...defaultSettings,
-            ...parsedSettings
+            ...parsedSettings,
+            autoUpdateWeek: true // 强制开启自动更新
           });
         } catch (error) {
           console.error('Failed to parse user settings', error);
@@ -82,7 +83,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
           const parsedSettings = JSON.parse(globalSettings);
           setSettings({
             ...defaultSettings,
-            ...parsedSettings
+            ...parsedSettings,
+            autoUpdateWeek: true // 强制开启自动更新
           });
         } catch (error) {
           console.error('Failed to parse global settings', error);
@@ -93,10 +95,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
 
   // 更新设置并保存到本地存储
   const updateSettings = async (newSettings: Partial<AppSettings>): Promise<void> => {
-    // 更新内存中的设置
+    // 更新内存中的设置，强制 autoUpdateWeek 为 true
     const updatedSettings = {
       ...settings,
-      ...newSettings
+      ...newSettings,
+      autoUpdateWeek: true // 强制开启自动更新
     };
     
     setSettings(updatedSettings);

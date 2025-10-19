@@ -347,10 +347,20 @@ const CourseItem = styled.div<{ background?: string }>`
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     border-radius: 14px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-    padding: 0.8rem 0.6rem;
-    min-height: 60px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    padding: 1rem 0.75rem;
+    min-height: 70px;
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    /* 增强背景对比度 */
+    background: ${props => {
+      const bg = props.background || 'rgba(10, 132, 255, 0.15)';
+      // 如果是默认背景，增强不透明度
+      if (bg === 'rgba(10, 132, 255, 0.15)') {
+        return 'rgba(10, 132, 255, 0.25)';
+      }
+      return bg;
+    }};
+    backdrop-filter: blur(8px);
   }
 `;
 
@@ -575,9 +585,11 @@ const CourseName = styled.div`
   color: rgba(0, 0, 0, 0.85);
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    font-size: 1rem;
+    font-size: 1.15rem;
     margin-bottom: 0.5rem;
     font-weight: 700;
+    color: rgba(0, 0, 0, 0.95);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
   }
 `;
 
@@ -590,6 +602,13 @@ const CourseLocation = styled.div`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    font-size: 0.95rem;
+    color: rgba(0, 0, 0, 0.75);
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  }
 `;
 
 const WeekNavigationContainer = styled.div`
