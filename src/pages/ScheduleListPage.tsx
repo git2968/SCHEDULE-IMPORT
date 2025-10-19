@@ -7,6 +7,7 @@ import { Schedule } from '../types';
 import GlassCard from '../components/GlassCard';
 import GlassButton from '../components/GlassButton';
 import AnimatedPageTitle from '../components/AnimatedPageTitle';
+import AnimatedList from '../components/animations/AnimatedList';
 
 const PageContainer = styled.div`
   padding: 1.5rem 0;
@@ -191,27 +192,29 @@ const ScheduleListPage: React.FC = () => {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '2rem' }}>加载中...</div>
         ) : userSchedules.length > 0 ? (
-          <ScheduleGrid>
-            {userSchedules.map(schedule => (
-              <ScheduleCard 
-                key={schedule.id} 
-                isActive={currentSchedule?.id === schedule.id}
-                onClick={() => handleScheduleSelect(schedule)}
-              >
-                {currentSchedule?.id === schedule.id && <ActiveBadge>当前</ActiveBadge>}
-                <ScheduleName>{schedule.name}</ScheduleName>
-                <ScheduleInfo>课程数量: {schedule.courses.length}</ScheduleInfo>
-                <ScheduleInfo>总周数: {schedule.totalWeeks}</ScheduleInfo>
-                <ScheduleInfo>更新时间: {formatDate(schedule.updatedAt)}</ScheduleInfo>
-                
-                <DeleteButton 
-                  onClick={(e) => handleDeleteSchedule(e, schedule.id)}
+          <AnimatedList>
+            <ScheduleGrid>
+              {userSchedules.map(schedule => (
+                <ScheduleCard 
+                  key={schedule.id} 
+                  isActive={currentSchedule?.id === schedule.id}
+                  onClick={() => handleScheduleSelect(schedule)}
                 >
-                  删除
-                </DeleteButton>
-              </ScheduleCard>
-            ))}
-          </ScheduleGrid>
+                  {currentSchedule?.id === schedule.id && <ActiveBadge>当前</ActiveBadge>}
+                  <ScheduleName>{schedule.name}</ScheduleName>
+                  <ScheduleInfo>课程数量: {schedule.courses.length}</ScheduleInfo>
+                  <ScheduleInfo>总周数: {schedule.totalWeeks}</ScheduleInfo>
+                  <ScheduleInfo>更新时间: {formatDate(schedule.updatedAt)}</ScheduleInfo>
+                  
+                  <DeleteButton 
+                    onClick={(e) => handleDeleteSchedule(e, schedule.id)}
+                  >
+                    删除
+                  </DeleteButton>
+                </ScheduleCard>
+              ))}
+            </ScheduleGrid>
+          </AnimatedList>
         ) : (
           <EmptyState>
             <p>还没有保存任何课表</p>

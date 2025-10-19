@@ -5,6 +5,7 @@ import { Course } from '../types';
 import GlassCard from '../components/GlassCard';
 import CourseEditor from '../components/CourseEditor';
 import AnimatedPageTitle from '../components/AnimatedPageTitle';
+import AnimatedList from '../components/animations/AnimatedList';
 
 const PageContainer = styled.div`
   padding: 1.5rem 0;
@@ -202,20 +203,22 @@ const CourseManagePage: React.FC = () => {
         </Header>
         
         {currentSchedule && currentSchedule.courses.length > 0 ? (
-          <CourseGrid>
-            {currentSchedule.courses.map(course => (
-              <CourseCard key={course.id} onClick={() => handleEditCourse(course)}>
-                <CourseName>{course.name}</CourseName>
-                <CourseInfo>{weekdays[course.day]} 第{course.startSession}-{course.endSession}节</CourseInfo>
-                <CourseInfo>{course.location || '无地点信息'}</CourseInfo>
-                <WeeksList>
-                  {course.weeks.map(week => (
-                    <WeekTag key={week}>第{week}周</WeekTag>
-                  ))}
-                </WeeksList>
-              </CourseCard>
-            ))}
-          </CourseGrid>
+          <AnimatedList>
+            <CourseGrid>
+              {currentSchedule.courses.map(course => (
+                <CourseCard key={course.id} onClick={() => handleEditCourse(course)}>
+                  <CourseName>{course.name}</CourseName>
+                  <CourseInfo>{weekdays[course.day]} 第{course.startSession}-{course.endSession}节</CourseInfo>
+                  <CourseInfo>{course.location || '无地点信息'}</CourseInfo>
+                  <WeeksList>
+                    {course.weeks.map(week => (
+                      <WeekTag key={week}>第{week}周</WeekTag>
+                    ))}
+                  </WeeksList>
+                </CourseCard>
+              ))}
+            </CourseGrid>
+          </AnimatedList>
         ) : (
           <EmptyState>
             <p>还没有添加任何课程</p>

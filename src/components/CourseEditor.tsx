@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { toast } from 'react-toastify';
 import { Course } from '../types';
 import { useSchedule } from '../hooks/useSchedule';
+import AnimatedList from './animations/AnimatedList';
 
 interface CourseEditorProps {
   course?: Course;
@@ -423,17 +424,19 @@ const CourseEditor: React.FC<CourseEditorProps> = ({ course, onClose, isNew = fa
         
         <FormGroup>
           <Label>上课周数</Label>
-          <WeeksContainer>
-            {Array.from({ length: 20 }, (_, i) => i + 1).map(week => (
-              <WeekTag
-                key={week}
-                isActive={formData.weeks.includes(week)}
-                onClick={() => toggleWeek(week)}
-              >
-                {week}
-              </WeekTag>
-            ))}
-          </WeeksContainer>
+          <AnimatedList>
+            <WeeksContainer>
+              {Array.from({ length: 20 }, (_, i) => i + 1).map(week => (
+                <WeekTag
+                  key={week}
+                  isActive={formData.weeks.includes(week)}
+                  onClick={() => toggleWeek(week)}
+                >
+                  {week}
+                </WeekTag>
+              ))}
+            </WeeksContainer>
+          </AnimatedList>
         </FormGroup>
         
         <ButtonGroup>

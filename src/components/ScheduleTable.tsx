@@ -5,6 +5,7 @@ import { useSchedule } from '../hooks/useSchedule';
 import { useSettings } from '../hooks/useSettings';
 import { exportScheduleToExcel } from '../utils/exportSchedule';
 import { getDateForWeekDay } from '../utils/dateUtils';
+import AnimatedList from './animations/AnimatedList';
 
 // 媒体查询断点
 const MOBILE_BREAKPOINT = '768px';
@@ -120,10 +121,10 @@ const TableHeaderCell = styled.th<{ isCurrentDay?: boolean; isTimeColumn?: boole
     padding: 0.7rem 0.5rem;
     
     ${props => props.isTimeColumn && `
-      width: 70px !important;  /* 移动端表头也需要匹配宽度 */
-      min-width: 70px !important;
-      max-width: 70px !important;
-      padding: 0.7rem 0.1rem !important;  /* 调整内边距 */
+      width: 85px !important;  /* 移动端表头匹配 TimeCell 宽度 */
+      min-width: 85px !important;
+      max-width: 85px !important;
+      padding: 0.7rem 0.6rem !important;  /* 匹配 TimeCell 内边距 */
       font-size: 0.8rem;
       text-align: center !important;
       box-sizing: border-box !important;
@@ -187,14 +188,14 @@ const TimeCell = styled.td`
   }
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    width: 70px !important;  /* 增加移动端宽度以容纳时间文本 */
-    min-width: 70px !important;
-    max-width: 70px !important;
+    width: 85px !important;  /* 增加宽度以完全包裹时间文本 */
+    min-width: 85px !important;
+    max-width: 85px !important;
     height: auto;
     min-height: 60px;
     flex-direction: row;
     justify-content: flex-start;
-    padding: 0.6rem 0.5rem !important;  /* 增加左右内边距 */
+    padding: 0.6rem 0.6rem !important;  /* 增加左右内边距 */
     border-radius: 18px;
     align-items: center;
     margin-bottom: 8px;
@@ -211,10 +212,10 @@ const SessionNumber = styled.div`
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     margin-bottom: 0;
-    margin-right: 10px; /* 增加间距以适应更宽的容器 */
-    min-width: 24px;  /* 增加最小宽度 */
+    margin-right: 8px; /* 调整间距 */
+    min-width: 22px;  /* 调整最小宽度 */
     text-align: center;
-    font-size: 1.2rem; /* 缩小字号 */
+    font-size: 1.1rem; /* 调整字号 */
     font-weight: 700;
     color: rgba(10, 132, 255, 0.9);
   }
@@ -228,7 +229,7 @@ const SessionTime = styled.div`
   line-height: 1.2;
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    font-size: 0.8rem;  /* 调整移动端字体以适应更宽的容器 */
+    font-size: 0.75rem;  /* 调整移动端字体以适应容器 */
     font-weight: 500;
     white-space: nowrap;
     overflow: visible;
@@ -1288,9 +1289,9 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                   <TableHeaderCell 
                     isTimeColumn={true} 
                     style={{ 
-                      width: '80px', 
-                      minWidth: '80px',
-                      padding: '1rem 0.5rem',
+                      width: '85px', 
+                      minWidth: '85px',
+                      padding: '1rem 0.6rem',
                       fontSize: '0.9rem',
                       fontWeight: '500',
                       borderRadius: '16px' // 统一使用移动端16px圆角
@@ -1330,47 +1331,49 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                   </TableHeaderCell>
                 </tr>
               </TableHeader>
-              <TableBody>
-                {sessionSlots.map(session => {
-                  const course = getCourseForSessionAndDay(session, selectedDay);
-                  const shouldRender = selectedDay === 0 || shouldRenderCourseCell(session, selectedDay);
-                  
-                  if (!shouldRender) return null;
-                  
-                  return (
-                    <TableRow key={session}>
-                      <TimeCell>
-                        <SessionNumber>{session}</SessionNumber>
-                        <SessionTime>
-                          {sessionTimes[session - 1]?.start}-{sessionTimes[session - 1]?.end}
-                        </SessionTime>
-                      </TimeCell>
-                      
-                      {selectedDay > 0 && (
-                        <TableCell 
-                          data-has-content={!!course}
-                          isCurrentDay={selectedDay === currentDay}
-                        >
-                          {course && (
-                            <CourseItem 
-                              background={getCourseColor(course.courseId)}
-                              onMouseEnter={(e) => handleCourseMouseEnter(e, getCourseInstanceId(course, selectedDay, session))}
-                              onMouseLeave={() => setActiveTooltip(null)}
-                              onClick={(e) => isMobileView && handleCourseMouseEnter(e, getCourseInstanceId(course, selectedDay, session))}
-                            >
-                              {isMobileView && course.startSession !== course.endSession && (
-                                <CourseSessionBadge>第 {course.startSession}-{course.endSession} 节</CourseSessionBadge>
-                              )}
-                              <CourseName>{cleanCourseName(course.name)}</CourseName>
-                              <CourseLocation>{course.location}</CourseLocation>
-                            </CourseItem>
-                          )}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
+              <AnimatedList>
+                <TableBody>
+                  {sessionSlots.map(session => {
+                    const course = getCourseForSessionAndDay(session, selectedDay);
+                    const shouldRender = selectedDay === 0 || shouldRenderCourseCell(session, selectedDay);
+                    
+                    if (!shouldRender) return null;
+                    
+                    return (
+                      <TableRow key={session}>
+                        <TimeCell>
+                          <SessionNumber>{session}</SessionNumber>
+                          <SessionTime>
+                            {sessionTimes[session - 1]?.start}-{sessionTimes[session - 1]?.end}
+                          </SessionTime>
+                        </TimeCell>
+                        
+                        {selectedDay > 0 && (
+                          <TableCell 
+                            data-has-content={!!course}
+                            isCurrentDay={selectedDay === currentDay}
+                          >
+                            {course && (
+                              <CourseItem 
+                                background={getCourseColor(course.courseId)}
+                                onMouseEnter={(e) => handleCourseMouseEnter(e, getCourseInstanceId(course, selectedDay, session))}
+                                onMouseLeave={() => setActiveTooltip(null)}
+                                onClick={(e) => isMobileView && handleCourseMouseEnter(e, getCourseInstanceId(course, selectedDay, session))}
+                              >
+                                {isMobileView && course.startSession !== course.endSession && (
+                                  <CourseSessionBadge>第 {course.startSession}-{course.endSession} 节</CourseSessionBadge>
+                                )}
+                                <CourseName>{cleanCourseName(course.name)}</CourseName>
+                                <CourseLocation>{course.location}</CourseLocation>
+                              </CourseItem>
+                            )}
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </AnimatedList>
             </Table>
           </ScrollContainer>
         </>
