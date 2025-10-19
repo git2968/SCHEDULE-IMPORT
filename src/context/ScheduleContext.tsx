@@ -769,7 +769,7 @@ export const ScheduleProvider: React.FC<ScheduleProviderProps> = ({ children }) 
     }
   };
 
-  const value = {
+  const value: ScheduleContextType = {
     currentSchedule,
     userSchedules,
     loading,

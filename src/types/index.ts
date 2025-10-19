@@ -37,7 +37,8 @@ export interface Settings {
 }
 
 export interface AppSettings {
-  backgroundImage?: string;
+  backgroundImage?: string; // 课程表应用的背景图片
+  appCenterBackgroundImage?: string; // 应用中心的背景图片
   theme?: string;
   language?: string;
   currentWeek?: number; // 当前周数
@@ -54,19 +55,21 @@ export interface AuthContextType {
 }
 
 export interface ScheduleContextType {
-  schedules: Schedule[];
-  courses: Course[];
   currentSchedule: Schedule | null;
+  userSchedules: Schedule[];
   loading: boolean;
   error: string | null;
-  createSchedule: (name: string) => Promise<void>;
-  updateSchedule: (scheduleId: string, name: string) => Promise<void>;
-  deleteSchedule: (scheduleId: string) => Promise<void>;
-  setCurrentSchedule: (scheduleId: string) => void;
-  addCourse: (course: Omit<Course, 'id' | 'scheduleId'>) => Promise<void>;
-  updateCourse: (courseId: string, course: Partial<Course>) => Promise<void>;
+  setCurrentSchedule: (schedule: Schedule | null) => void;
+  saveSchedule: (schedule: Schedule) => Promise<void>;
+  parseExcel: (file: File) => Promise<Schedule>;
+  updateSchedule: (scheduleUpdate: Partial<Schedule>) => Promise<void>;
+  addCourse: (course: Omit<Course, 'id'>) => Promise<void>;
+  updateCourse: (courseId: string, courseData: Partial<Course>) => Promise<void>;
   deleteCourse: (courseId: string) => Promise<void>;
-  parseExcel: (file: File) => Promise<void>;
+  addWeekToCourse: (courseId: string, week: number) => Promise<void>;
+  removeWeekFromCourse: (courseId: string, week: number) => Promise<void>;
+  loadUserSchedules: () => Promise<Schedule[]>;
+  deleteSchedule: (scheduleId: string) => Promise<void>;
 }
 
 export interface SettingsContextType {

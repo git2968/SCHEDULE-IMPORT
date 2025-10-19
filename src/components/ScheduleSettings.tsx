@@ -5,6 +5,7 @@ import { useSchedule } from '../hooks/useSchedule';
 import { useSettings } from '../hooks/useSettings';
 import GlassButton from './GlassButton';
 import GlassInput from './GlassInput';
+import Icon from './Icon';
 import { getTodayString, isValidDateString, calculateSemesterStartDate, validateReverseCalculation } from '../utils/dateUtils';
 
 const SettingsContainer = styled.div`
@@ -281,7 +282,7 @@ const ScheduleSettings: React.FC = () => {
               onClick={() => handleModeChange('forward')}
               type="button"
             >
-              📅 知道开学日期
+              <Icon name="calendar" /> 知道开学日期
             </ModeButton>
             <ModeButton 
               active={calculationMode === 'reverse'} 
@@ -340,14 +341,14 @@ const ScheduleSettings: React.FC = () => {
                     onClick={applyCalculatedDate}
                     style={{ marginTop: '0.5rem', marginRight: '0.5rem' }}
                   >
-                    ✅ 应用这个日期
+                    <Icon name="checkmark-circle" /> 应用这个日期
                   </CalculateButton>
                   <CalculateButton
                     type="button"
                     onClick={() => setShowCalculationResult(false)}
                     style={{ marginTop: '0.5rem', background: 'rgba(255, 69, 58, 0.6)' }}
                   >
-                    ❌ 重新计算
+                    <Icon name="cross-circle" /> 重新计算
                   </CalculateButton>
                 </ResultDisplay>
               )}

@@ -6,6 +6,8 @@ import './index.css';
 import { AuthProvider } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { ScheduleProvider } from './context/ScheduleContext';
+import { CustomAppsProvider } from './context/CustomAppsContext';
+import { CustomCategoriesProvider } from './context/CustomCategoriesContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -15,13 +17,17 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <AuthProvider>
         <SettingsProvider>
           <ScheduleProvider>
-            <App />
-            <ToastContainer 
-              position="top-right" 
-              autoClose={3000} 
-              closeButton={true}
-              theme="light"
-            />
+            <CustomCategoriesProvider>
+              <CustomAppsProvider>
+                <App />
+                <ToastContainer 
+                  position="top-right" 
+                  autoClose={3000} 
+                  closeButton={true}
+                  theme="light"
+                />
+              </CustomAppsProvider>
+            </CustomCategoriesProvider>
           </ScheduleProvider>
         </SettingsProvider>
       </AuthProvider>

@@ -2,13 +2,15 @@ import React, { ReactNode, useState } from 'react';
 import styled from 'styled-components';
 
 interface TabProps {
-  label: string;
+  id?: string;
+  label: string | ReactNode;
   children: ReactNode;
 }
 
 interface GlassTabsProps {
   children: React.ReactElement<TabProps>[];
-  activeTab?: number;
+  activeTab?: string | number;
+  onTabChange?: (id: string) => void;
   onChange?: (index: number) => void;
   className?: string;
   style?: React.CSSProperties;
@@ -73,20 +75,50 @@ export const GlassTab: React.FC<TabProps> = ({ children }) => {
 const GlassTabs: React.FC<GlassTabsProps> = ({
   children,
   activeTab: controlledActiveTab,
+  onTabChange,
   onChange,
   className,
   style
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState(0);
   
-  // Determine if the component is controlled or uncontrolled
-  const activeTab = controlledActiveTab !== undefined ? controlledActiveTab : internalActiveTab;
+  // Get tab ids from children
+  const tabIds = React.Children.map(children, (child) => {
+    if (React.isValidElement<TabProps>(child)) {
+      return child.props.id;
+    }
+    return undefined;
+  }) || [];
+  
+  // Determine active index based on controlledActiveTab
+  let activeIndex = internalActiveTab;
+  if (controlledActiveTab !== undefined) {
+    if (typeof controlledActiveTab === 'string') {
+      // Find index by id
+      const index = tabIds.findIndex(id => id === controlledActiveTab);
+      activeIndex = index >= 0 ? index : 0;
+    } else {
+      // Use numeric index directly
+      activeIndex = controlledActiveTab;
+    }
+  }
   
   // Handle tab change
   const handleTabChange = (index: number) => {
+    const tabId = tabIds[index];
+    
+    // Call onTabChange with id if available
+    if (onTabChange && tabId) {
+      onTabChange(tabId);
+    }
+    
+    // Call onChange with index (legacy support)
     if (onChange) {
       onChange(index);
-    } else {
+    }
+    
+    // Update internal state if uncontrolled
+    if (controlledActiveTab === undefined) {
       setInternalActiveTab(index);
     }
   };
@@ -105,7 +137,7 @@ const GlassTabs: React.FC<GlassTabsProps> = ({
         {tabLabels?.map((label, index) => (
           <TabButton
             key={index}
-            active={activeTab === index}
+            active={activeIndex === index}
             onClick={() => handleTabChange(index)}
           >
             {label}
@@ -115,7 +147,7 @@ const GlassTabs: React.FC<GlassTabsProps> = ({
       
       <TabContent>
         {React.Children.map(children, (child, index) => {
-          if (React.isValidElement(child) && index === activeTab) {
+          if (React.isValidElement(child) && index === activeIndex) {
             return child;
           }
           return null;

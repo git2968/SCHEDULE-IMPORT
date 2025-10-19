@@ -43,7 +43,7 @@ const FooterText = styled.p`
 const Footer: React.FC = () => {
   return (
     <FooterContainer>
-      <FooterText>YUEの课表</FooterText>
+      <FooterText>YUEの应用中心</FooterText>
     </FooterContainer>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import { useSettings } from '../hooks/useSettings';
@@ -56,6 +56,7 @@ const Main = styled.main`
 
 const Layout: React.FC = () => {
   const { settings } = useSettings();
+  const location = useLocation();
   const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
   
   // 获取默认背景图片路径
@@ -71,9 +72,15 @@ const Layout: React.FC = () => {
     return './backImg/f028b1e9685c586324a8f2a6626e3695.jpeg';
   };
 
+  // 判断是否在应用中心页面
+  const isAppCenterPage = location.pathname.startsWith('/app-center');
+
   // 当背景图片改变时更新
   useEffect(() => {
-    const currentBg = settings?.backgroundImage || getDefaultBackgroundPath();
+    // 根据当前页面选择对应的背景图片
+    const currentBg = isAppCenterPage 
+      ? (settings?.appCenterBackgroundImage || getDefaultBackgroundPath())
+      : (settings?.backgroundImage || getDefaultBackgroundPath());
     
     // 如果是第一次加载或背景图片相同，直接设置
     if (backgroundImages.length === 0 || backgroundImages[0] === currentBg) {
@@ -90,7 +97,7 @@ const Layout: React.FC = () => {
     }, 1000); // 等待过渡完成
     
     return () => clearTimeout(timer);
-  }, [settings?.backgroundImage]);
+  }, [settings?.backgroundImage, settings?.appCenterBackgroundImage, isAppCenterPage]);
 
   return (
     <LayoutContainer>

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { toast } from 'react-toastify';
 import GlassButton from './GlassButton';
+import Icon from './Icon';
 
 // 简单的淡入淡出效果
 const fadeIn = keyframes`
@@ -99,7 +100,11 @@ const TransitionMessage = styled.div`
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
+  // 判断是否在课程表应用内
+  const isInScheduleApp = location.pathname.startsWith('/apps/schedule');
   
   const handleLogout = async () => {
     try {
@@ -134,15 +139,15 @@ const Header: React.FC = () => {
       )}
       
       <HeaderContainer style={{ opacity: isLoggingOut ? 0.3 : 1 }}>
-        <Logo to="/">YUEの课表</Logo>
+        <Logo to="/app-center"><Icon name="home" /> 应用中心</Logo>
         
         <Nav>
-          <NavLink to="/">导入课表</NavLink>
-          {currentUser && (
+          {/* 只在课程表应用内显示课程表相关导航 */}
+          {currentUser && isInScheduleApp && (
             <>
-              <NavLink to="/schedules">我的课表</NavLink>
-              <NavLink to="/dashboard">当前课表</NavLink>
-              <NavLink to="/courses">课程管理</NavLink>
+              <NavLink to="/apps/schedule"><Icon name="calendar" /> 课表</NavLink>
+              <NavLink to="/apps/schedule/list"><Icon name="book" /> 我的课表</NavLink>
+              <NavLink to="/apps/schedule/courses"><Icon name="cog" /> 课程管理</NavLink>
             </>
           )}
         </Nav>

@@ -8,6 +8,7 @@ import GlassCard from '../components/GlassCard';
 import GlassButton from '../components/GlassButton';
 import AnimatedPageTitle from '../components/AnimatedPageTitle';
 import AnimatedList from '../components/animations/AnimatedList';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const PageContainer = styled.div`
   padding: 1.5rem 0;
@@ -189,6 +190,11 @@ const EmptyState = styled.div`
 const ScheduleListPage: React.FC = () => {
   const { currentSchedule, userSchedules, setCurrentSchedule, deleteSchedule, loadUserSchedules } = useSchedule();
   const [loading, setLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; scheduleId: string; scheduleName: string }>({
+    show: false,
+    scheduleId: '',
+    scheduleName: ''
+  });
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -204,24 +210,30 @@ const ScheduleListPage: React.FC = () => {
   const handleScheduleSelect = (schedule: Schedule) => {
     setCurrentSchedule(schedule);
     toast.success(`已切换到课表: ${schedule.name}`);
-    navigate('/dashboard');
+    navigate('/apps/schedule');
   };
   
-  const handleDeleteSchedule = async (e: React.MouseEvent, scheduleId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, scheduleId: string, scheduleName: string) => {
     e.stopPropagation();
-    
-    if (window.confirm('确定要删除这个课表吗？此操作不可恢复。')) {
-      try {
-        await deleteSchedule(scheduleId);
-        toast.success('课表删除成功');
-      } catch (error) {
-        toast.error('删除课表失败');
-      }
+    setDeleteConfirm({ show: true, scheduleId, scheduleName });
+  };
+  
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteSchedule(deleteConfirm.scheduleId);
+      toast.success('课表删除成功');
+      setDeleteConfirm({ show: false, scheduleId: '', scheduleName: '' });
+    } catch (error) {
+      toast.error('删除课表失败');
     }
   };
   
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ show: false, scheduleId: '', scheduleName: '' });
+  };
+  
   const handleImportNew = () => {
-    navigate('/');
+    navigate('/apps/schedule');
   };
   
   // 格式化日期
@@ -264,7 +276,7 @@ const ScheduleListPage: React.FC = () => {
                   <ScheduleInfo>更新时间: {formatDate(schedule.updatedAt)}</ScheduleInfo>
                   
                   <DeleteButton 
-                    onClick={(e) => handleDeleteSchedule(e, schedule.id)}
+                    onClick={(e) => handleDeleteClick(e, schedule.id, schedule.name)}
                   >
                     删除
                   </DeleteButton>
@@ -279,6 +291,18 @@ const ScheduleListPage: React.FC = () => {
           </EmptyState>
         )}
       </ContentCard>
+      
+      {deleteConfirm.show && (
+        <ConfirmDialog
+          title="删除课表"
+          message={`确定要删除课表"${deleteConfirm.scheduleName}"吗？此操作不可恢复。`}
+          variant="danger"
+          confirmText="删除"
+          cancelText="取消"
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
+      )}
     </PageContainer>
   );
 };

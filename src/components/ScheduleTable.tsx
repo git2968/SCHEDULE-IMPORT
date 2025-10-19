@@ -140,11 +140,11 @@ const TableHeaderCell = styled.th<{ isCurrentDay?: boolean; isTimeColumn?: boole
     padding: 0.7rem 0.5rem;
     
     ${props => props.isTimeColumn && `
-      width: 85px !important;  /* 移动端表头匹配 TimeCell 宽度 */
-      min-width: 85px !important;
-      max-width: 85px !important;
-      padding: 0.7rem 0.6rem !important;  /* 匹配 TimeCell 内边距 */
-      font-size: 0.8rem;
+      width: 60px !important;  /* 移动端表头匹配 TimeCell 宽度 */
+      min-width: 60px !important;
+      max-width: 60px !important;
+      padding: 0.5rem 0.3rem !important;  /* 匹配 TimeCell 内边距 */
+      font-size: 0.75rem;
       text-align: center !important;
       box-sizing: border-box !important;
     `}
@@ -221,15 +221,15 @@ const TimeCell = styled.td`
   }
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    width: 85px !important;
-    min-width: 85px !important;
-    max-width: 85px !important;
+    width: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
     height: auto;
     min-height: 60px;
     flex-direction: row;
     justify-content: flex-start;
-    padding: 0.6rem 0.6rem !important;
-    border-radius: 14px;
+    padding: 0.4rem 0.3rem !important;
+    border-radius: 12px;
     align-items: center;
     margin-bottom: 8px;
     box-sizing: border-box !important;
@@ -251,12 +251,14 @@ const SessionNumber = styled.div`
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     margin-bottom: 0;
-    margin-right: 8px;
-    min-width: 22px;
+    margin-right: 4px;
+    min-width: 16px;
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: rgba(10, 132, 255, 0.9);
+    padding: 0;
+    background: transparent;
   }
 `;
 
@@ -270,11 +272,16 @@ const SessionTime = styled.div`
   letter-spacing: 0.3px;
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 500;
     white-space: nowrap;
     overflow: visible;
-    color: rgba(0, 0, 0, 0.65);
+    color: rgba(0, 0, 0, 0.6);
+    line-height: 1.2;
+    letter-spacing: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
   }
 `;
 
