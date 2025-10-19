@@ -11,17 +11,19 @@ import AnimatedList from './animations/AnimatedList';
 const MOBILE_BREAKPOINT = '768px';
 
 const TableContainer = styled.div`
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    padding: 1rem;
+    padding: 0.8rem;
     border-radius: 16px;
+    background: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   }
 `;
 
@@ -29,7 +31,8 @@ const TableContainer = styled.div`
 const Table = styled.table`
   width: 100%;
   border-collapse: separate;
-  border-spacing: 6px;
+  border-spacing: 8px;
+  table-layout: fixed;
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     border-spacing: 4px;
@@ -81,25 +84,28 @@ const TableHeaderCell = styled.th<{ isCurrentDay?: boolean; isTimeColumn?: boole
   font-weight: 600;
   color: rgba(0, 0, 0, 0.75);
   font-size: 1rem;
-  border-radius: 20px;
-  background: ${props => props.isCurrentDay ? 'rgba(10, 132, 255, 0.2)' : 'rgba(255, 255, 255, 0.6)'};
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s ease;
+  border-radius: 16px;
+  background: ${props => props.isCurrentDay ? 'linear-gradient(135deg, rgba(10, 132, 255, 0.15), rgba(64, 210, 255, 0.1))' : 'rgba(255, 255, 255, 0.7)'};
+  box-shadow: ${props => props.isCurrentDay ? '0 2px 8px rgba(10, 132, 255, 0.1)' : '0 1px 4px rgba(0, 0, 0, 0.03)'};
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  border: 1px solid ${props => props.isCurrentDay ? 'rgba(10, 132, 255, 0.2)' : 'rgba(255, 255, 255, 0.3)'};
   
   /* Make time column header match the width of time cells */
   ${props => props.isTimeColumn && `
-    width: 55px !important;  /* 强制设置宽度 */
-    min-width: 55px !important;
-    max-width: 55px !important;
-    padding: 0.3rem 0.05rem !important;  /* 匹配 TimeCell 的内边距 */
-    font-size: 0.85rem;
-    text-align: center !important;  /* 确保居中对齐 */
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    padding: 0.5rem 0.3rem !important;
+    font-size: 0.9rem;
+    text-align: center !important;
     box-sizing: border-box !important;
+    font-weight: 700;
   `}
   
   &:hover {
-    background: ${props => props.isCurrentDay ? 'rgba(10, 132, 255, 0.25)' : 'rgba(255, 255, 255, 0.75)'};
+    background: ${props => props.isCurrentDay ? 'linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(64, 210, 255, 0.15))' : 'rgba(255, 255, 255, 0.85)'};
+    transform: ${props => props.isTimeColumn ? 'translateX(2px)' : 'translateY(-1px)'};
   }
   
   ${props => props.isCurrentDay && css`
@@ -111,8 +117,9 @@ const TableHeaderCell = styled.th<{ isCurrentDay?: boolean; isTimeColumn?: boole
       transform: translateX(-50%);
       width: 6px;
       height: 6px;
-      background: rgba(10, 132, 255, 0.6);
+      background: #0A84FF;
       border-radius: 50%;
+      box-shadow: 0 0 4px rgba(10, 132, 255, 0.4);
     }
   `}
   
@@ -134,14 +141,16 @@ const TableHeaderCell = styled.th<{ isCurrentDay?: boolean; isTimeColumn?: boole
 
 const WeekdayText = styled.div`
   font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.2rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.3px;
 `;
 
 const DateText = styled.div`
   font-size: 0.8rem;
-  font-weight: 400;
-  color: rgba(0, 0, 0, 0.5);
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.55);
+  letter-spacing: 0.2px;
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     font-size: 0.75rem;
@@ -155,67 +164,85 @@ const TableBody = styled.tbody`
 `;
 
 const TableRow = styled.tr`
+  height: 80px;
+  
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
+    height: auto;
   }
 `;
 
 // 调整TimeCell组件，优化手机端显示
 const TimeCell = styled.td`
-  padding: 0.3rem 0.05rem !important;  /* 强制应用内边距 */
+  padding: 0.5rem 0.3rem !important;
   text-align: center !important;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.75);
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
   font-size: 0.95rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s ease;
-  width: 55px !important;  /* 强制设置宽度 */
-  min-width: 55px !important;
-  max-width: 55px !important;
-  height: 70px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 70px !important;
+  min-width: 70px !important;
+  max-width: 70px !important;
+  height: 80px;
+  display: table-cell;
+  vertical-align: middle;
   box-sizing: border-box !important;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  position: relative;
+  
+  & > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
   
   &:hover {
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateX(2px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   }
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    width: 85px !important;  /* 增加宽度以完全包裹时间文本 */
+    width: 85px !important;
     min-width: 85px !important;
     max-width: 85px !important;
     height: auto;
     min-height: 60px;
     flex-direction: row;
     justify-content: flex-start;
-    padding: 0.6rem 0.6rem !important;  /* 增加左右内边距 */
-    border-radius: 18px;
+    padding: 0.6rem 0.6rem !important;
+    border-radius: 14px;
     align-items: center;
     margin-bottom: 8px;
     box-sizing: border-box !important;
-    background: rgba(240, 245, 255, 0.7);
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(10, 132, 255, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 `;
 
 // 调整SessionNumber组件
 const SessionNumber = styled.div`
   font-weight: 700;
-  font-size: ${props => props.children && String(props.children).length > 1 ? '0.9rem' : '1rem'};  /* 进一步缩小字体 */
+  font-size: 1.1rem;
   margin-bottom: 4px;
+  color: rgba(10, 132, 255, 0.9);
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.08), rgba(64, 210, 255, 0.05));
+  padding: 2px 8px;
+  border-radius: 8px;
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     margin-bottom: 0;
-    margin-right: 8px; /* 调整间距 */
-    min-width: 22px;  /* 调整最小宽度 */
+    margin-right: 8px;
+    min-width: 22px;
     text-align: center;
-    font-size: 1.1rem; /* 调整字号 */
+    font-size: 1.1rem;
     font-weight: 700;
     color: rgba(10, 132, 255, 0.9);
   }
@@ -223,13 +250,15 @@ const SessionNumber = styled.div`
 
 // 调整SessionTime组件
 const SessionTime = styled.div`
-  font-size: 0.8rem;  /* 稍微缩小字体以适应更窄的列 */
-  color: rgba(0, 0, 0, 0.7);
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.65);
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    font-size: 0.75rem;  /* 调整移动端字体以适应容器 */
+    font-size: 0.75rem;
     font-weight: 500;
     white-space: nowrap;
     overflow: visible;
@@ -241,19 +270,21 @@ const SessionTime = styled.div`
 const TableCell = styled.td<{ 'data-has-content'?: boolean; isCurrentDay?: boolean }>`
   width: 145px;
   height: 80px;
-  padding: 0.5rem;
+  padding: 0.4rem;
   text-align: center;
   vertical-align: middle;
-  border-radius: 20px;
+  border-radius: 16px;
   background: ${props => {
     if (props['data-has-content']) return 'transparent';
-    return 'transparent';  /* 空课时也设为透明，但保持正常的布局和尺寸 */
+    if (props.isCurrentDay) return 'rgba(10, 132, 255, 0.02)';
+    return 'transparent';
   }};
   transition: all 0.2s ease;
   
   &:hover {
     background: ${props => {
       if (props['data-has-content']) return 'transparent';
+      if (props.isCurrentDay) return 'rgba(10, 132, 255, 0.04)';
       return 'transparent';
     }};
   }
@@ -261,7 +292,7 @@ const TableCell = styled.td<{ 'data-has-content'?: boolean; isCurrentDay?: boole
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     width: 100%;
     height: auto;
-    min-height: 70px;  /* 保持固定最小高度，避免影响布局 */
+    min-height: 70px;
     margin-bottom: 8px;
     background: transparent;
     border-radius: 16px;
@@ -279,24 +310,28 @@ const CourseItem = styled.div<{ background?: string }>`
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
   position: relative;
-  /* 确保所有课程项目的高度一致 */
   min-height: 60px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  &:active {
+    transform: translateY(-1px);
   }
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     padding: 0.8rem 0.6rem;
-    /* 移动端也保持最小高度 */
     min-height: 60px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
   }
 `;
 
@@ -306,39 +341,52 @@ const MobileWeekSelector = styled.div`
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     display: flex;
-    justify-content: flex-start; /* 左对齐 */
+    justify-content: flex-start;
     align-items: center;
-    margin-bottom: 16px;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    flex-wrap: wrap; /* 允许换行 */
-    gap: 8px; /* 元素之间的间隙 */
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    flex-wrap: wrap;
+    gap: 8px;
   }
 `;
 
 const MobileWeekButton = styled.button`
-  background: rgba(255, 255, 255, 0.7);
-  border: none;
-  border-radius: 12px;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.7);
+  background: rgba(10, 132, 255, 0.08);
+  border: 1px solid rgba(10, 132, 255, 0.15);
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(10, 132, 255, 0.9);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(10, 132, 255, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
   
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+    transform: none;
   }
 `;
 
 const MobileWeekDisplay = styled.div`
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.8);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  padding: 0 8px;
 `;
 
 const MobileDaySelector = styled.div`
@@ -349,7 +397,10 @@ const MobileDaySelector = styled.div`
     overflow-x: auto;
     scrollbar-width: none;
     margin-bottom: 12px;
-    padding: 6px 0;
+    padding: 4px;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 14px;
     
     &::-webkit-scrollbar {
       display: none;
@@ -360,48 +411,47 @@ const MobileDaySelector = styled.div`
 // 调整移动端表格的总体布局
 const MobileDayButton = styled.button<{ isActive?: boolean }>`
   background: ${props => props.isActive 
-    ? 'linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(64, 210, 255, 0.15))' 
-    : 'rgba(255, 255, 255, 0.7)'};
-  border: ${props => props.isActive ? '1px solid rgba(10, 132, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.2)'};
-  border-radius: 16px;
-  padding: 10px 16px;
-  margin-right: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: ${props => props.isActive ? 'rgba(10, 132, 255, 0.9)' : 'rgba(0, 0, 0, 0.7)'};
+    ? 'linear-gradient(135deg, #0A84FF, #64D2FF)' 
+    : 'rgba(255, 255, 255, 0.8)'};
+  border: ${props => props.isActive ? 'none' : '1px solid rgba(0, 0, 0, 0.08)'};
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: ${props => props.isActive ? '600' : '500'};
+  color: ${props => props.isActive ? '#fff' : 'rgba(0, 0, 0, 0.7)'};
   white-space: nowrap;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 70px;
-  transition: all 0.2s ease;
+  min-width: 65px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: ${props => props.isActive 
-    ? '0 2px 8px rgba(10, 132, 255, 0.15)' 
-    : '0 1px 4px rgba(0, 0, 0, 0.05)'};
+    ? '0 4px 12px rgba(10, 132, 255, 0.25)' 
+    : '0 1px 3px rgba(0, 0, 0, 0.04)'};
   
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     box-shadow: ${props => props.isActive 
-      ? '0 4px 12px rgba(10, 132, 255, 0.2)' 
-      : '0 2px 8px rgba(0, 0, 0, 0.08)'};
+      ? '0 6px 16px rgba(10, 132, 255, 0.3)' 
+      : '0 2px 6px rgba(0, 0, 0, 0.08)'};
   }
   
-  &:last-child {
-    margin-right: 0;
+  &:active {
+    transform: translateY(0);
   }
 `;
 
 const MobileDayText = styled.div`
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 `;
 
 const MobileDateText = styled.div`
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  opacity: 0.8;
+  opacity: 0.85;
 `;
 
 const fadeIn = keyframes`
@@ -412,6 +462,17 @@ const fadeIn = keyframes`
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+`;
+
+const modalFadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
 `;
 
@@ -471,17 +532,18 @@ const TooltipValue = styled.div`
 
 // 添加一个显示课程节次范围的组件
 const CourseSessionBadge = styled.div`
-  background: rgba(10, 132, 255, 0.15);
+  background: rgba(255, 255, 255, 0.85);
   color: rgba(10, 132, 255, 0.9);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 12px;
-  margin-bottom: 8px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
-    font-size: 0.9rem;
-    padding: 3px 10px;
+    font-size: 0.85rem;
+    padding: 4px 10px;
     margin-bottom: 6px;
   }
 `;
@@ -516,6 +578,10 @@ const WeekNavigationContainer = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 1rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 `;
 
 const WeekNavigationControls = styled.div`
@@ -527,22 +593,24 @@ const WeekNavigationControls = styled.div`
 `;
 
 const WeekProgress = styled.div`
-  width: 80%;
+  width: 90%;
   max-width: 500px;
   height: 6px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(10, 132, 255, 0.1);
   border-radius: 3px;
   margin-top: 0.5rem;
   overflow: hidden;
   position: relative;
+  border: 1px solid rgba(10, 132, 255, 0.1);
 `;
 
 const WeekProgressFill = styled.div<{ percent: number }>`
   height: 100%;
   width: ${props => props.percent}%;
-  background: rgba(10, 132, 255, 0.5);
+  background: linear-gradient(90deg, #0A84FF, #64D2FF);
   border-radius: 3px;
   transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(10, 132, 255, 0.3);
 `;
 
 const LoadingContainer = styled.div`
@@ -587,22 +655,74 @@ const TableContainerWithAnimation = styled(TableContainer)`
 `;
 
 const WeekButton = styled.button`
-  background: rgba(255, 255, 255, 0.6);
-  border: none;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(10, 132, 255, 0.15);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: all 0.2s;
-  font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(10, 132, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   
   &:hover {
-    background: rgba(10, 132, 255, 0.15);
+    background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(64, 210, 255, 0.08));
     transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(10, 132, 255, 0.15);
+    border-color: rgba(10, 132, 255, 0.25);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.5);
+  }
+`;
+
+const WeekDisplay = styled.div`
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  min-width: 130px;
+  text-align: center;
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.08), rgba(64, 210, 255, 0.05));
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(10, 132, 255, 0.15);
+`;
+
+const ExportButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(64, 210, 255, 0.08));
+  border: 1px solid rgba(10, 132, 255, 0.2);
+  border-radius: 12px;
+  padding: 0.65rem 1.3rem;
+  margin-left: 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(10, 132, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(10, 132, 255, 0.1);
+  
+  &:hover {
+    background: linear-gradient(135deg, rgba(10, 132, 255, 0.15), rgba(64, 210, 255, 0.12));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(10, 132, 255, 0.2);
   }
   
   &:active {
@@ -611,53 +731,6 @@ const WeekButton = styled.button`
   
   &:disabled {
     opacity: 0.4;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-`;
-
-const WeekDisplay = styled.div`
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.85);
-  min-width: 120px;
-  text-align: center;
-  padding: 0.6rem 1rem;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-`;
-
-const ExportButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.7);
-  border: none;
-  border-radius: 16px;
-  padding: 0.6rem 1.2rem;
-  margin-left: 16px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.75);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  
-  &:hover {
-    background: rgba(10, 132, 255, 0.15);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  }
-  
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  
-  &:disabled {
-    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
@@ -721,30 +794,31 @@ interface SessionTime {
 
 // 添加视图切换按钮样式
 const ViewToggleButton = styled.button`
-  background: rgba(255, 255, 255, 0.7);
-  border: none;
-  border-radius: 12px;
-  padding: 8px 14px;
-  font-size: 0.9rem;
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(64, 210, 255, 0.08));
+  border: 1px solid rgba(10, 132, 255, 0.2);
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.7);
+  color: rgba(10, 132, 255, 0.9);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(10, 132, 255, 0.1);
   display: none;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   
   @media (max-width: ${MOBILE_BREAKPOINT}) {
     display: flex;
-    margin-left: auto; /* 将按钮放在周控制器旁边 */
+    margin-left: auto;
     margin-right: 0;
     z-index: 10;
   }
   
   &:hover {
-    background: rgba(10, 132, 255, 0.15);
+    background: linear-gradient(135deg, rgba(10, 132, 255, 0.15), rgba(64, 210, 255, 0.12));
     transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(10, 132, 255, 0.15);
   }
   
   &:active {
@@ -756,12 +830,26 @@ const ViewToggleButton = styled.button`
     width: 14px;
     height: 14px;
     background-image: ${props => props.theme === 'week' 
-      ? 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23333\'%3E%3Cpath d=\'M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z\'/%3E%3C/svg%3E")' 
-      : 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23333\'%3E%3Cpath d=\'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z\'/%3E%3C/svg%3E")'};
+      ? 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%230A84FF\'%3E%3Cpath d=\'M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z\'/%3E%3C/svg%3E")' 
+      : 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%230A84FF\'%3E%3Cpath d=\'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z\'/%3E%3C/svg%3E")'};
     background-size: contain;
     background-repeat: no-repeat;
     margin-right: 6px;
   }
+`;
+
+// 背景遮罩
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1090;
+  animation: ${fadeIn} 0.2s ease-out;
 `;
 
 // 极简现代化的课程详情弹窗
@@ -783,7 +871,7 @@ const CoursePressTooltip = styled.div`
     0 0 0 1px rgba(255, 255, 255, 0.05) inset,
     0 8px 16px rgba(0, 0, 0, 0.06);
   z-index: 1100;
-  animation: ${fadeIn} 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: ${modalFadeIn} 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
   overflow: hidden;
   
@@ -1120,15 +1208,12 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
     setActiveTooltip(instanceId);
   };
 
-  // 处理课程点击事件 (currently unused, kept for future use)
-  // const handleCourseClick = (course: Course, session: number) => {
-  //   setClickedCourse({ course, session });
-  //   
-  //   // 3秒后自动关闭
-  //   setTimeout(() => {
-  //     setClickedCourse(null);
-  //   }, 5000);
-  // };
+  // 处理课程点击事件
+  const handleCourseClick = (course: Course, session: number) => {
+    if (isMobileView) {
+      setClickedCourse({ course, session });
+    }
+  };
   
   // 关闭课程信息
   const handleCloseTooltip = () => {
@@ -1196,10 +1281,12 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
               shouldRenderCourseCell(session, 7) ? (
                 <TableRow key={session}>
                   <TimeCell>
-                    <SessionNumber>{session}</SessionNumber>
-                    <SessionTime>
-                      {sessionTimes[session - 1]?.start}-{sessionTimes[session - 1]?.end}
-                    </SessionTime>
+                    <div>
+                      <SessionNumber>{session}</SessionNumber>
+                      <SessionTime>
+                        {sessionTimes[session - 1]?.start}-{sessionTimes[session - 1]?.end}
+                      </SessionTime>
+                    </div>
                   </TimeCell>
                   
                   {weekdays.slice(1).map((_, dayIndex) => {
@@ -1342,10 +1429,12 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                     return (
                       <TableRow key={session}>
                         <TimeCell>
-                          <SessionNumber>{session}</SessionNumber>
-                          <SessionTime>
-                            {sessionTimes[session - 1]?.start}-{sessionTimes[session - 1]?.end}
-                          </SessionTime>
+                          <div>
+                            <SessionNumber>{session}</SessionNumber>
+                            <SessionTime>
+                              {sessionTimes[session - 1]?.start}-{sessionTimes[session - 1]?.end}
+                            </SessionTime>
+                          </div>
                         </TimeCell>
                         
                         {selectedDay > 0 && (
@@ -1356,9 +1445,9 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                             {course && (
                               <CourseItem 
                                 background={getCourseColor(course.courseId)}
-                                onMouseEnter={(e) => handleCourseMouseEnter(e, getCourseInstanceId(course, selectedDay, session))}
-                                onMouseLeave={() => setActiveTooltip(null)}
-                                onClick={(e) => isMobileView && handleCourseMouseEnter(e, getCourseInstanceId(course, selectedDay, session))}
+                                onMouseEnter={(e) => !isMobileView && handleCourseMouseEnter(e, getCourseInstanceId(course, selectedDay, session))}
+                                onMouseLeave={() => !isMobileView && setActiveTooltip(null)}
+                                onClick={() => handleCourseClick(course, session)}
                               >
                                 {isMobileView && course.startSession !== course.endSession && (
                                   <CourseSessionBadge>第 {course.startSession}-{course.endSession} 节</CourseSessionBadge>
@@ -1444,28 +1533,29 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                     height: '60px',
                     padding: '0.25rem 0.05rem !important',  /* 强制内边距 */
                     fontSize: '0.8rem',
-                    flexDirection: 'column',
                     borderRadius: '16px',
                     background: 'rgba(255, 255, 255, 0.6)',
                     boxSizing: 'border-box',
                     textAlign: 'center'
                   }}>
-                    <SessionNumber style={{ 
-                      fontSize: '0.9rem',  /* 进一步缩小字体 */
-                      marginBottom: '4px',
-                      fontWeight: '700',
-                      color: 'rgba(10, 132, 255, 0.8)'
-                    }}>
-                      {session}
-                    </SessionNumber>
-                    <SessionTime style={{ 
-                      fontSize: '0.7rem',  /* 缩小时间字体 */
-                      fontWeight: '500',
-                      color: 'rgba(0, 0, 0, 0.6)',
-                      textAlign: 'center'
-                    }}>
-                      {sessionTimes[session - 1]?.start}-{sessionTimes[session - 1]?.end}
-                    </SessionTime>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      <SessionNumber style={{ 
+                        fontSize: '0.9rem',  /* 进一步缩小字体 */
+                        marginBottom: '4px',
+                        fontWeight: '700',
+                        color: 'rgba(10, 132, 255, 0.8)'
+                      }}>
+                        {session}
+                      </SessionNumber>
+                      <SessionTime style={{ 
+                        fontSize: '0.7rem',  /* 缩小时间字体 */
+                        fontWeight: '500',
+                        color: 'rgba(0, 0, 0, 0.6)',
+                        textAlign: 'center'
+                      }}>
+                        {sessionTimes[session - 1]?.start}-{sessionTimes[session - 1]?.end}
+                      </SessionTime>
+                    </div>
                   </TimeCell>
                   
                   {weekdays.slice(1).map((_, dayIndex) => {
@@ -1513,9 +1603,9 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
                               position: 'relative',
                               boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)'
                             }}
-                            onMouseEnter={(e) => handleCourseMouseEnter(e, getCourseInstanceId(course, day, session))}
-                            onMouseLeave={() => setActiveTooltip(null)}
-                            onClick={(e) => isMobileView && handleCourseMouseEnter(e, getCourseInstanceId(course, day, session))}
+                            onMouseEnter={(e) => !isMobileView && handleCourseMouseEnter(e, getCourseInstanceId(course, day, session))}
+                            onMouseLeave={() => !isMobileView && setActiveTooltip(null)}
+                            onClick={() => handleCourseClick(course, session)}
                           >
                             {/* 为所有课程显示节数标识 */}
                             <div style={{
@@ -1655,20 +1745,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
       {isMobileView && clickedCourse && (
         <>
           {/* 背景遮罩 */}
-          <div 
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0, 0, 0, 0.2)',
-              backdropFilter: 'blur(8px)',
-              zIndex: 1090,
-              animation: `${fadeIn} 0.2s ease-out`
-            }}
-            onClick={handleCloseTooltip}
-          />
+          <ModalOverlay onClick={handleCloseTooltip} />
           
           <CoursePressTooltip>
             <CloseButton onClick={handleCloseTooltip} />

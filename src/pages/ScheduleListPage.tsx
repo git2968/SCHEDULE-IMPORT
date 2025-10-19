@@ -39,87 +39,144 @@ const Header = styled.div`
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid rgba(10, 132, 255, 0.1);
+  
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.85);
+    margin: 0;
+  }
 `;
 
 const ImportButton = styled(GlassButton)`
   margin-left: auto;
+  background: linear-gradient(135deg, #0A84FF, #64D2FF);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(10, 132, 255, 0.2);
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+    transform: translateY(-2px);
+  }
 `;
 
 const ScheduleGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.2rem;
+  align-items: stretch;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 `;
 
 const ScheduleCard = styled.div<{ isActive: boolean }>`
-  background: ${props => props.isActive ? 'rgba(10, 132, 255, 0.1)' : 'rgba(255, 255, 255, 0.5)'};
-  border: ${props => props.isActive ? '2px solid var(--primary-color)' : '1px solid rgba(0, 0, 0, 0.1)'};
-  border-radius: 12px;
+  background: ${props => props.isActive 
+    ? 'linear-gradient(135deg, rgba(10, 132, 255, 0.12), rgba(64, 210, 255, 0.08))' 
+    : 'rgba(255, 255, 255, 0.6)'};
+  border: ${props => props.isActive 
+    ? '2px solid rgba(10, 132, 255, 0.3)' 
+    : '1px solid rgba(255, 255, 255, 0.5)'};
+  border-radius: 14px;
   padding: 1.25rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s;
+  padding-bottom: 3rem;
+  box-shadow: ${props => props.isActive 
+    ? '0 4px 12px rgba(10, 132, 255, 0.15)' 
+    : '0 2px 8px rgba(0, 0, 0, 0.04)'};
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: ${props => props.isActive 
+      ? '0 6px 16px rgba(10, 132, 255, 0.2)' 
+      : '0 4px 12px rgba(0, 0, 0, 0.08)'};
+    background: ${props => props.isActive 
+      ? 'linear-gradient(135deg, rgba(10, 132, 255, 0.15), rgba(64, 210, 255, 0.1))' 
+      : 'rgba(255, 255, 255, 0.7)'};
+  }
+  
+  &:active {
+    transform: translateY(-1px);
   }
 `;
 
 const ScheduleName = styled.h3`
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: rgba(0, 0, 0, 0.8);
-  padding-right: 30px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: rgba(0, 0, 0, 0.85);
+  padding-right: 60px;
+  line-height: 1.4;
 `;
 
 const ScheduleInfo = styled.div`
   font-size: 0.9rem;
-  color: rgba(0, 0, 0, 0.6);
-  margin-bottom: 0.25rem;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
+  line-height: 1.5;
   
   &:before {
     content: '';
     display: inline-block;
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
-    background-color: var(--primary-color);
-    margin-right: 0.5rem;
+    background: linear-gradient(135deg, #0A84FF, #64D2FF);
+    margin-right: 0.6rem;
+    flex-shrink: 0;
   }
 `;
 
 const ActiveBadge = styled.div`
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: var(--primary-color);
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #0A84FF, #64D2FF);
   color: white;
   font-size: 0.7rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 10px;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(10, 132, 255, 0.25);
 `;
 
 const DeleteButton = styled.button`
   position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  color: var(--error-color);
-  font-size: 0.9rem;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255, 69, 58, 0.1);
+  border: 1px solid rgba(255, 69, 58, 0.2);
+  color: rgba(255, 69, 58, 0.9);
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0.3rem 0.5rem;
-  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
   transition: all 0.2s;
   
   &:hover {
-    background: rgba(255, 59, 48, 0.1);
+    background: rgba(255, 69, 58, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(255, 69, 58, 0.2);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `;
 

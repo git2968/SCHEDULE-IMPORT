@@ -42,13 +42,17 @@ const gradientMove = keyframes`
 
 const TitleContainer = styled.div`
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   position: relative;
   padding: 0.5rem 0;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+  }
 `;
 
 const Title = styled.h1`
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   font-family: 'Arial', sans-serif;
   background: linear-gradient(90deg, #0A84FF, #64D2FF);
@@ -56,33 +60,49 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   margin: 0;
   animation: ${gradientAnimation} 6s ease infinite, ${fadeIn} 1s ease-out;
   position: relative;
+  
+  @media (max-width: 768px) {
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+  }
 `;
 
 const Subtitle = styled.div`
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.75);
-  margin-top: 0.5rem;
-  letter-spacing: 1px;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 0.4rem;
+  letter-spacing: 0.5px;
   animation: ${fadeIn} 1s ease-out 0.3s both;
+  
+  @media (max-width: 768px) {
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
+  }
 `;
 
 const lineExpand = keyframes`
   from { width: 0; }
-  to { width: 60px; }
+  to { width: 50px; }
 `;
 
 const Decoration = styled.div`
-  width: 60px;
-  height: 3px;
+  width: 50px;
+  height: 2.5px;
   background: linear-gradient(90deg, #0A84FF, #64D2FF);
-  margin: 0.75rem auto;
+  margin: 0.5rem auto;
   border-radius: 3px;
   animation: ${lineExpand} 0.7s ease-out forwards;
+  
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 2px;
+    margin: 0.4rem auto;
+  }
 `;
 
 const AnimatedPageTitle: React.FC<AnimatedPageTitleProps> = ({ title }) => {

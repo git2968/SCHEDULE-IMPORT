@@ -22,28 +22,48 @@ const TabsContainer = styled.div`
 
 const TabList = styled.div`
   display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px 16px 0 0;
+  
+  @media (max-width: 768px) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
 `;
 
 const TabButton = styled.button<{ active: boolean }>`
-  padding: 12px 24px;
-  background: ${props => props.active ? 'rgba(255, 255, 255, 0.15)' : 'transparent'};
+  padding: 14px 24px;
+  background: ${props => props.active ? 'rgba(255, 255, 255, 0.3)' : 'transparent'};
   border: none;
-  border-bottom: 2px solid ${props => props.active ? 'rgba(255, 255, 255, 0.8)' : 'transparent'};
-  color: ${props => props.active ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'};
+  border-bottom: 3px solid ${props => props.active ? '#0A84FF' : 'transparent'};
+  color: ${props => props.active ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.55)'};
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: ${props => props.active ? '600' : '500'};
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
   
   &:hover {
-    background: ${props => props.active ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)'};
-    color: rgba(255, 255, 255, 0.9);
+    background: ${props => props.active ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)'};
+    color: ${props => props.active ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.75)'};
+  }
+  
+  &:active {
+    transform: scale(0.98);
   }
 `;
 
 const TabContent = styled.div`
   padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
 `;
 
 export const GlassTab: React.FC<TabProps> = ({ children }) => {
