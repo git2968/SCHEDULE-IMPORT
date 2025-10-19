@@ -1,13 +1,32 @@
+/**
+ * 课表导出工具模块
+ * 
+ * 功能：将课表数据导出为Excel文件
+ * - 支持单周或多周导出
+ * - 自动格式化课程信息（名称、地点、教师）
+ * - 提供友好的时间段显示
+ * 
+ * @module exportSchedule
+ */
+
 import * as XLSX from 'xlsx';
 import { Course, Schedule } from '../types';
 
-// 将周几转换为文本
+/**
+ * 将星期几数字转换为中文文本
+ * @param day 1-7 表示周一到周日
+ * @returns 对应的中文星期文本
+ */
 const getDayText = (day: number): string => {
   const days = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   return days[day] || '';
 };
 
-// 将节次转换为大致的时间段
+/**
+ * 将节次编号转换为时间段字符串
+ * @param session 节次编号 (1-12)
+ * @returns 时间段字符串，如 "08:00-08:45"
+ */
 const getTimeSlot = (session: number): string => {
   switch (session) {
     case 1: return '08:00-08:45';

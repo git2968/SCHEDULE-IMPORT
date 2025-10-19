@@ -1,3 +1,15 @@
+/**
+ * 课表组件模块
+ * 
+ * 功能说明：
+ * - 展示完整的课程表格，支持桌面端和移动端响应式布局
+ * - 桌面端：完整周视图（周一至周日），悬停显示课程详情
+ * - 移动端：日视图/周视图切换，点击显示课程详情弹窗
+ * - 支持周数导航、进度显示、课表导出等功能
+ * 
+ * @module ScheduleTable
+ */
+
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { Course } from '../types';
@@ -7,7 +19,7 @@ import { exportScheduleToExcel } from '../utils/exportSchedule';
 import { getDateForWeekDay } from '../utils/dateUtils';
 import AnimatedList from './animations/AnimatedList';
 
-// 媒体查询断点
+/** 响应式断点：小于等于768px视为移动端 */
 const MOBILE_BREAKPOINT = '768px';
 
 const TableContainer = styled.div`
@@ -751,42 +763,50 @@ const NoCoursesMessage = styled.div`
   font-weight: 500;
 `;
 
-// 课程背景颜色 - 使用更鲜艳但透明的颜色
+/**
+ * 课程背景颜色调色板
+ * 使用半透明的鲜艳色彩，确保良好的视觉区分和阅读体验
+ * 通过哈希算法为每个课程分配一致的颜色
+ */
 const courseColors = [
-  'rgba(10, 132, 255, 0.18)',
-  'rgba(48, 209, 88, 0.18)',
-  'rgba(255, 69, 58, 0.18)',
-  'rgba(255, 159, 10, 0.18)',
-  'rgba(191, 90, 242, 0.18)',
-  'rgba(94, 92, 230, 0.18)',
-  'rgba(0, 199, 190, 0.18)',
-  'rgba(255, 214, 10, 0.18)'
+  'rgba(10, 132, 255, 0.18)',    // 蓝色
+  'rgba(48, 209, 88, 0.18)',     // 绿色
+  'rgba(255, 69, 58, 0.18)',     // 红色
+  'rgba(255, 159, 10, 0.18)',    // 橙色
+  'rgba(191, 90, 242, 0.18)',    // 紫色
+  'rgba(94, 92, 230, 0.18)',     // 靛蓝
+  'rgba(0, 199, 190, 0.18)',     // 青色
+  'rgba(255, 214, 10, 0.18)'     // 黄色
 ];
 
-// Helper function to clean course name from code
+/**
+ * 清理课程名称，移除课程代码
+ * @param name 原始课程名称，可能包含 [数字代码] 格式的课程编号
+ * @returns 清理后的课程名称
+ * @example cleanCourseName("高等数学[28305038]") => "高等数学"
+ */
 const cleanCourseName = (name: string): string => {
-  // Remove course codes like [28305038] from the course name
-  // First, try to extract the name without the code
   const nameWithoutCode = name.replace(/\[\d+\]/, '').trim();
-  
-  // If the nameWithoutCode is empty, return the original name
   return nameWithoutCode || name;
 };
 
-// Helper function to extract course code (currently unused, kept for future use)
-// const extractCourseCode = (name: string): string => {
-//   const match = name.match(/\[(\d+)\]/);
-//   return match ? match[1] : '无';
-// };
-
-// 添加组件props接口
+/**
+ * 课表组件的Props接口
+ * @property courses 可选的课程列表，如果不提供则使用Context中的数据
+ * @property currentWeek 可选的当前周数，如果不提供则使用设置中的周数
+ * @property totalWeeks 可选的总周数，默认为20周
+ */
 interface ScheduleTableProps {
   courses?: Course[];
   currentWeek?: number;
   totalWeeks?: number;
 }
 
-// 保留SessionTime接口，但只用于显示，不再编辑
+/**
+ * 课程节次时间接口
+ * @property start 课程开始时间
+ * @property end 课程结束时间
+ */
 interface SessionTime {
   start: string;
   end: string;
@@ -990,35 +1010,54 @@ const CloseButton = styled.button`
   }
 `;
 
+/**
+ * 课表组件 - 用于显示课程表格，支持桌面端和移动端两种视图
+ * 
+ * 桌面端：显示完整的周视图，包含周一至周日的所有课程
+ * 移动端：支持日视图（单天）和周视图切换，优化移动设备显示
+ * 
+ * 功能特性：
+ * - 周数导航和进度显示
+ * - 课程悬停/点击查看详情
+ * - 导出课表到Excel
+ * - 响应式布局适配
+ * - 列表动画效果
+ * 
+ * @param props - 组件属性，可选传入课程数据和周数信息
+ */
 const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
   const scheduleContext = useSchedule();
   const { settings, getCurrentWeek } = useSettings();
-  // 使用props或从context中获取数据
+  
+  // 优先使用props数据，否则使用context中的数据
   const contextSchedule = scheduleContext.currentSchedule;
-  // 优先使用设置中的当前周数，但避免在初始化时调用函数
+  
+  // 初始化当前周数：props > 设置 > 默认值
   const [currentWeek, setCurrentWeek] = useState(() => {
     if (props.currentWeek) {
       return props.currentWeek;
     }
-    // 只在初始化时调用一次getCurrentWeek
     return getCurrentWeek();
   });
+  // 基础状态
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
   const [isExporting, setIsExporting] = useState(false);
   
-  // 添加移动端视图状态
+  // Tooltip相关状态（桌面端悬停显示）
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  
+  // 移动端视图状态
   const [isMobileView, setIsMobileView] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<number>(0);
+  const [selectedDay, setSelectedDay] = useState<number>(0); // 0表示未选择，1-7表示周一到周日
+  const [viewMode, setViewMode] = useState<'day' | 'week'>('day'); // 移动端视图模式：日视图或周视图
   
-  // 添加视图模式切换状态 - 默认为日视图
-  const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
-  
-  // 添加课程点击状态
+  // 课程详情弹窗状态（移动端点击显示）
   const [clickedCourse, setClickedCourse] = useState<{course: Course, session: number} | null>(null);
   
-  // 检测移动端视图
+  /**
+   * 检测并响应屏幕尺寸变化，自动切换移动端/桌面端视图
+   */
   useEffect(() => {
     const checkMobileView = () => {
       setIsMobileView(window.innerWidth <= 768);
@@ -1032,25 +1071,34 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
     };
   }, []);
   
-  // 当切换到移动端视图时，如果没有选择日期，设为当天
+  /**
+   * 移动端自动选择当天日期
+   * 当切换到移动端视图且未选择日期时，默认显示今天的课程
+   */
   useEffect(() => {
     if (isMobileView && selectedDay === 0) {
-      const today = new Date().getDay(); // 0是周日，1-6是周一到周六
+      const today = new Date().getDay();
       setSelectedDay(today === 0 ? 7 : today);
     }
   }, [isMobileView, selectedDay]);
-
-  // 同步设置中的当前周数
+ 
+  /**
+   * 同步设置中的当前周数
+   * 当设置发生变化时，更新课表显示的周数（仅在未通过props指定周数时）
+   */
   useEffect(() => {
-    if (!props.currentWeek) { // 只有在没有传入props的情况下才使用设置
+    if (!props.currentWeek) {
       const settingsWeek = getCurrentWeek();
       if (settingsWeek !== currentWeek) {
         setCurrentWeek(settingsWeek);
       }
     }
-  }, [settings?.currentWeek, settings?.semesterStartDate, settings?.autoUpdateWeek, props.currentWeek]); // 直接依赖设置值，避免函数引用问题
+  }, [settings?.currentWeek, settings?.semesterStartDate, settings?.autoUpdateWeek, props.currentWeek]);
   
-  // 保留时间数据，但不再提供编辑功能
+  /**
+   * 课程节次时间配置
+   * 定义每节课的上课和下课时间
+   */
   const [sessionTimes] = useState<SessionTime[]>([
     { start: "8:25", end: "9:10" },    // Session 1
     { start: "9:15", end: "10:00" },   // Session 2
@@ -1100,35 +1148,44 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
     );
   }
   
-  // 优先使用props中的数据，如果没有则使用context中的数据
+  /** 课程数据：优先使用props，否则使用context */
   const courses = props.courses || contextSchedule?.courses || [];
+  
+  /** 学期总周数：优先使用props，否则使用context，默认20周 */
   const totalWeeks = props.totalWeeks || contextSchedule?.totalWeeks || 20;
   
-  // 星期几的标题
+  /** 星期标题数组：索引0为空，1-7对应周一到周日 */
   const weekdays = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   
-  // 获取指定星期几的日期字符串
+  /**
+   * 获取指定星期几的日期字符串
+   * @param dayOfWeek 星期几 (1-7)
+   * @returns 格式化的日期字符串，如 "10/23"
+   */
   const getDateString = (dayOfWeek: number): string => {
     if (!settings?.semesterStartDate) return '';
     return getDateForWeekDay(settings.semesterStartDate, currentWeek, dayOfWeek);
   };
   
-  // 节次信息
+  /** 节次数组：1-12节 */
   const sessionSlots = Array.from({ length: 12 }, (_, i) => i + 1);
   
-  // 切换周数
+  /** 切换到上一周 */
   const handlePrevWeek = () => {
     setCurrentWeek(prev => Math.max(1, prev - 1));
   };
   
+  /** 切换到下一周 */
   const handleNextWeek = () => {
     setCurrentWeek(prev => Math.min(totalWeeks, prev + 1));
   };
   
-  // 计算周进度百分比
+  /** 计算当前周进度百分比 */
   const weekProgressPercentage = (currentWeek / totalWeeks) * 100;
   
-  // 处理导出课表
+  /**
+   * 导出课表到Excel文件
+   */
   const handleExportSchedule = () => {
     if (!contextSchedule) return;
     
@@ -1142,12 +1199,20 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
     }
   };
   
-  // 切换选中的日期（手机端）
+  /**
+   * 切换选中的日期（移动端日视图）
+   * @param day 星期几 (1-7)
+   */
   const handleDayChange = (day: number) => {
     setSelectedDay(day);
   };
   
-  // 获取指定节次和星期几的课程
+  /**
+   * 获取指定节次和星期几的课程
+   * @param session 节次编号 (1-12)
+   * @param day 星期几 (1-7)
+   * @returns 对应的课程对象，如果没有则返回null
+   */
   const getCourseForSessionAndDay = (session: number, day: number): Course | null => {
     return courses.find(course => 
       course.day === day && 
@@ -1157,43 +1222,68 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
     ) || null;
   };
   
-  // 判断是否应该渲染课程单元格
+  /**
+   * 判断是否应该渲染课程单元格
+   * 对于跨多节的课程，只在第一节渲染，其他节使用rowSpan合并
+   * @param session 节次编号
+   * @param day 星期几
+   * @returns 是否应该渲染该单元格
+   */
   const shouldRenderCourseCell = (session: number, day: number): boolean => {
     const course = getCourseForSessionAndDay(session, day);
     if (!course) return true;
-    
-    // 如果是多节课程的第一节，则渲染
     return session === course.startSession;
   };
   
-  // 获取课程持续的节数
+  /**
+   * 获取课程持续的节数
+   * @param course 课程对象
+   * @returns 课程持续的节数
+   */
   const getCourseDuration = (course: Course): number => {
     return course.endSession - course.startSession + 1;
   };
   
-  // 根据课程ID获取一致的背景颜色
+  /**
+   * 根据课程ID获取一致的背景颜色
+   * 使用哈希算法确保相同课程总是获得相同颜色
+   * @param courseId 课程唯一标识
+   * @returns 背景颜色的rgba值
+   */
   const getCourseColor = (courseId: string): string => {
     const hash = courseId.split('').reduce((acc, char) => {
       return char.charCodeAt(0) + ((acc << 5) - acc);
     }, 0);
-    
     return courseColors[Math.abs(hash) % courseColors.length];
   };
   
-  // 获取当前星期几（1-7）
+  /**
+   * 获取当前星期几
+   * @returns 1-7 表示周一到周日
+   */
   const getCurrentDay = (): number => {
-    const today = new Date().getDay(); // 0 is Sunday, 1 is Monday
-    return today === 0 ? 7 : today; // Convert to 1-7 where 1 is Monday
+    const today = new Date().getDay();
+    return today === 0 ? 7 : today;
   };
   
   const currentDay = getCurrentDay();
   
-  // Generate unique identifier for course instance
+  /**
+   * 生成课程实例的唯一标识符
+   * 用于区分同一课程在不同时间和地点的实例
+   * @param course 课程对象
+   * @param day 星期几
+   * @param session 节次
+   * @returns 唯一标识符字符串
+   */
   const getCourseInstanceId = (course: Course, day: number, session: number): string => {
     return `${course.courseId}-${day}-${session}`;
   };
-
-  // Handle tooltip positioning
+ 
+  /**
+   * 处理课程悬停事件（仅桌面端）
+   * 计算并显示Tooltip的位置
+   */
   const handleCourseMouseEnter = (event: React.MouseEvent, instanceId: string) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const containerRect = document.querySelector('.schedule-container')?.getBoundingClientRect();
@@ -1207,32 +1297,47 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
     
     setActiveTooltip(instanceId);
   };
-
-  // 处理课程点击事件
+ 
+  /**
+   * 处理课程点击事件（仅移动端）
+   * 点击课程卡片显示详情弹窗
+   */
   const handleCourseClick = (course: Course, session: number) => {
     if (isMobileView) {
       setClickedCourse({ course, session });
     }
   };
   
-  // 关闭课程信息
+  /**
+   * 关闭课程详情弹窗
+   */
   const handleCloseTooltip = () => {
     setClickedCourse(null);
   };
-
-  // 获取课程的上下课时间
+ 
+  /**
+   * 获取课程的上下课时间范围
+   * @param course 课程对象
+   * @returns 格式化的时间范围字符串，如 "8:25 - 11:00"
+   */
   const getCourseTimeRange = (course: Course) => {
     const startTime = sessionTimes[course.startSession - 1]?.start;
     const endTime = sessionTimes[course.endSession - 1]?.end;
     return `${startTime} - ${endTime}`;
   };
-
-  // 切换视图模式
+ 
+  /**
+   * 切换移动端视图模式（日视图/周视图）
+   */
   const toggleViewMode = () => {
     setViewMode(prevMode => prevMode === 'day' ? 'week' : 'day');
   };
 
-  // 渲染电脑端表格
+  /**
+   * 渲染桌面端课表
+   * 显示完整的周视图（周一至周日），包含周导航、进度条和导出功能
+   * 悬停课程卡片显示详细信息
+   */
   const renderDesktopTable = () => (
     <>
       <WeekNavigationContainer>
@@ -1333,8 +1438,14 @@ const ScheduleTable: React.FC<ScheduleTableProps> = (props) => {
       </ScrollContainer>
     </>
   );
-
-  // 渲染手机端表格
+ 
+  /**
+   * 渲染移动端课表
+   * 支持两种视图模式：
+   * - 日视图：显示单天的课程，优化小屏幕显示
+   * - 周视图：紧凑的周视图，横向滚动查看
+   * 点击课程卡片弹窗显示详细信息
+   */
   const renderMobileTable = () => (
     <>
       <MobileWeekSelector>
