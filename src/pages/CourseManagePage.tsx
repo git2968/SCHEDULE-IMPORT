@@ -334,6 +334,13 @@ const CourseManagePage: React.FC = () => {
     }
   }, [currentSchedule, selectedSchedule]);
   
+  // 当 currentSchedule 更新时，同步更新 selectedSchedule（如果它们的ID相同）
+  useEffect(() => {
+    if (currentSchedule && selectedSchedule && currentSchedule.id === selectedSchedule.id) {
+      setSelectedSchedule(currentSchedule);
+    }
+  }, [currentSchedule]);
+  
   const handleScheduleChange = (scheduleId: string) => {
     const schedule = userSchedules.find(s => s.id === scheduleId);
     if (schedule) {
