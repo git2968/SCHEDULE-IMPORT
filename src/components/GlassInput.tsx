@@ -5,7 +5,7 @@ interface GlassInputProps {
   id?: string;
   type?: string;
   value: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -13,7 +13,11 @@ interface GlassInputProps {
   style?: React.CSSProperties;
   min?: string | number;
   max?: string | number;
+  step?: string | number;
   fullWidth?: boolean;
+  as?: 'input' | 'textarea';
+  name?: string;
+  rows?: number;
 }
 
 const StyledInputContainer = styled.div<{ fullWidth?: boolean }>`
@@ -21,24 +25,48 @@ const StyledInputContainer = styled.div<{ fullWidth?: boolean }>`
   width: ${props => (props.fullWidth ? '100%' : 'auto')};
 `;
 
-const StyledInput = styled.input<{ disabled?: boolean }>`
+const baseStyles = `
   width: 100%;
   padding: 12px 16px;
-  background: ${props => props.disabled ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)'};
   backdrop-filter: blur(10px);
-  border: 1px solid ${props => props.disabled ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)'};
   border-radius: 8px;
-  color: ${props => props.disabled ? 'rgba(255, 255, 255, 0.5)' : 'inherit'};
   font-size: 1rem;
   transition: all 0.3s ease;
   outline: none;
-  opacity: ${props => (props.disabled ? '0.7' : '1')};
-  cursor: ${props => props.disabled ? 'not-allowed' : 'text'};
+  font-family: inherit;
   
   &:focus {
     border-color: rgba(255, 255, 255, 0.5);
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
   }
+  
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+`;
+
+const StyledInput = styled.input<{ disabled?: boolean }>`
+  ${baseStyles}
+  background: ${props => props.disabled ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)'};
+  border: 1px solid ${props => props.disabled ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)'};
+  color: ${props => props.disabled ? 'rgba(255, 255, 255, 0.5)' : 'inherit'};
+  opacity: ${props => (props.disabled ? '0.7' : '1')};
+  cursor: ${props => props.disabled ? 'not-allowed' : 'text'};
+  
+  &::placeholder {
+    color: ${props => props.disabled ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.5)'};
+  }
+`;
+
+const StyledTextarea = styled.textarea<{ disabled?: boolean }>`
+  ${baseStyles}
+  background: ${props => props.disabled ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)'};
+  border: 1px solid ${props => props.disabled ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)'};
+  color: ${props => props.disabled ? 'rgba(255, 255, 255, 0.5)' : 'inherit'};
+  opacity: ${props => (props.disabled ? '0.7' : '1')};
+  cursor: ${props => props.disabled ? 'not-allowed' : 'text'};
+  resize: vertical;
+  min-height: 80px;
   
   &::placeholder {
     color: ${props => props.disabled ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.5)'};
@@ -57,21 +85,40 @@ const GlassInput: React.FC<GlassInputProps> = ({
   style,
   min,
   max,
-  fullWidth = false
+  step,
+  fullWidth = false,
+  as = 'input',
+  name,
+  rows = 3
 }) => {
   return (
     <StyledInputContainer fullWidth={fullWidth} className={className} style={style}>
-      <StyledInput
-        id={id}
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        disabled={disabled}
-        min={min}
-        max={max}
-      />
+      {as === 'textarea' ? (
+        <StyledTextarea
+          id={id}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          rows={rows}
+        />
+      ) : (
+        <StyledInput
+          id={id}
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          min={min}
+          max={max}
+          step={step}
+        />
+      )}
     </StyledInputContainer>
   );
 };

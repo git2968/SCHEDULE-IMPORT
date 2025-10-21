@@ -51,7 +51,7 @@ const CalendarDropdown = styled.div<{ isOpen: boolean }>`
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   border: 1.5px solid rgba(255, 255, 255, 0.6);
   padding: 1rem;
-  z-index: 1000;
+  z-index: 9999;
   opacity: ${props => props.isOpen ? 1 : 0};
   visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
   transform: ${props => props.isOpen ? 'translateY(0)' : 'translateY(-10px)'};

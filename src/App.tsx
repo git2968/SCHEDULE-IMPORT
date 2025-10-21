@@ -10,6 +10,7 @@ import AppCenter from './pages/AppCenter';
 import ScheduleApp from './pages/ScheduleApp';
 import CourseManagePage from './pages/CourseManagePage';
 import ScheduleListPage from './pages/ScheduleListPage';
+import FitnessApp from './pages/FitnessApp';
 import IconShowcase from './pages/IconShowcase';
 
 /**
@@ -67,6 +68,13 @@ function App() {
           <Route path="apps/schedule/list" element={
             <ProtectedRoute>
               <ScheduleListPage />
+            </ProtectedRoute>
+          } />
+          
+          {/* 健身应用 */}
+          <Route path="apps/fitness" element={
+            <ProtectedRoute>
+              <FitnessApp />
             </ProtectedRoute>
           } />
           

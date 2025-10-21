@@ -79,4 +79,67 @@ export interface SettingsContextType {
   resetSettings: () => Promise<void>;
   getCurrentWeek: () => number;
   updateCurrentWeek: () => void;
+}
+
+// ========== 健身应用相关类型 ==========
+
+export interface BodyRecord {
+  id: string;
+  userId: string;
+  date: string; // YYYY-MM-DD
+  weight?: number; // 体重 (kg)
+  waistline?: number; // 腰围 (cm)
+  hipline?: number; // 臀围 (cm)
+  chest?: number; // 胸围 (cm)
+  arm?: number; // 臂围 (cm)
+  thigh?: number; // 腿围 (cm)
+  bodyFat?: number; // 体脂率 (%)
+  muscleMass?: number; // 肌肉量 (kg)
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FoodItem {
+  name: string;
+  amount: number; // 食物量（克）
+  calories: number; // 卡路里
+  protein?: number; // 蛋白质（克）
+  carbs?: number; // 碳水化合物（克）
+  fat?: number; // 脂肪（克）
+}
+
+export interface FoodRecord {
+  id: string;
+  userId: string;
+  date: string; // YYYY-MM-DD
+  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack'; // 餐次
+  foods: FoodItem[];
+  totalCalories: number;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FitnessContextType {
+  bodyRecords: BodyRecord[];
+  foodRecords: FoodRecord[];
+  loading: boolean;
+  error: string | null;
+  
+  // 身体数据相关
+  addBodyRecord: (record: Omit<BodyRecord, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateBodyRecord: (recordId: string, data: Partial<BodyRecord>) => Promise<void>;
+  deleteBodyRecord: (recordId: string) => Promise<void>;
+  getBodyRecordsByDateRange: (startDate: string, endDate: string) => BodyRecord[];
+  
+  // 饮食记录相关
+  addFoodRecord: (record: Omit<FoodRecord, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateFoodRecord: (recordId: string, data: Partial<FoodRecord>) => Promise<void>;
+  deleteFoodRecord: (recordId: string) => Promise<void>;
+  getFoodRecordsByDate: (date: string) => FoodRecord[];
+  getDailyCalories: (date: string) => number;
+  
+  // 数据加载
+  loadUserData: () => Promise<void>;
 } 

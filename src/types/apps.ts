@@ -137,6 +137,23 @@ export const APP_DATA: AppCategory[] = [
     color: 'linear-gradient(135deg, #9F7AEA, #B794F4)',
     subcategories: [
       {
+        id: 'fitness',
+        name: '健康健身',
+        icon: 'heart-1',
+        apps: [
+          {
+            id: 'fitness-tracker',
+            name: '健身减脂记录',
+            description: '记录身体数据、饮食摄入，智能计算热量，用数据见证你的改变',
+            icon: 'heart-1',
+            path: '/apps/fitness',
+            color: 'rgba(255, 69, 122, 0.15)',
+            category: 'life',
+            subcategory: 'fitness',
+          },
+        ],
+      },
+      {
         id: 'weather',
         name: '天气',
         icon: 'cloud-2',

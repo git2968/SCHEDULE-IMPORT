@@ -1,0 +1,30 @@
+.stack-container {
+  position: relative;
+  perspective: 600px;
+  margin: 0 auto;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.card-rotate {
+  position: absolute;
+  cursor: grab;
+}
+
+.card {
+  border-radius: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  box-shadow: 
+    0 8px 32px rgba(10, 132, 255, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.card-image {
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
